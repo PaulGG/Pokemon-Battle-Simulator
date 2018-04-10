@@ -187,25 +187,33 @@ class Move:
         #TODO: possibly make passive into an objet
         if attacker.passive is "adaptability":
             return 2
-        elif type is attacker.type1 or type is attacker.type2:
+        elif self.type is attacker.type1 or type is attacker.type2:
             return 1.5
         else:
             return 1
 
     def determineEffectiveness(self, attacker, defender):
-        if defender.type1 in self.type.typeEffective or defender.type2 in self.type.typeEffective:
+        if defender.type1 in self.type.typeImmunities or defender.type2 in self.type.typeImmunities:
+            return 0
+        elif defender.type1 in self.type.typeEffective or defender.type2 in self.type.typeEffective:
             if defender.type1 in self.type.typeEffective and defender.type2 in self.type.typeEffective:
                 return 4
+            elif defender.type1 in self.type.typeEffective and defender.type2 in self.type.typeNotEffective:
+                return 1
+            elif defender.type2 in self.type.typeEffective and defender.type1 in self.type.typeNotEffective:
+                return 1
             else:
                 return 2
         elif defender.type1 in self.type.typeNotEffective or defender.type2 in self.type.typeNotEffective:
             if defender.type1 in self.type.typeNotEffective and defender.type2 in self.type.typeNotEffective:
                 return 0.25
+            elif defender.type1 in self.type.typeEffective and defender.type2 in self.type.typeNotEffective:
+                return 1
+            elif defender.type2 in self.type.typeEffective and defender.type1 in self.type.typeNotEffective:
+                return 1 
             else:
                 return 0.5
-        elif self.type.typeImmunities:
-            if defender.type1 in self.type.typeImmunities or defender.type2 in self.type.typeImmunities:
-                return 0
+       
         else: return 1
 
     def determineBurn(self, attacker, defender):
@@ -215,7 +223,7 @@ class Move:
         else: 
             return 1
     
-    def damageFunc(self, attacker, defender):
+    def damageFunc(self, attacker, defender, player):
         targets = 1
         weather = self.determineWeatherMoveDamage()
         critical = self.determineCrit(attacker, defender)
@@ -232,7 +240,10 @@ class Move:
         else: 
             defender.hp -= round(((((2 * attacker.level) / 5 + 2) * self.power * (attacker.spAttack / defender.spDefense)) / 50 + 2) * modifier)
         
-        print(attacker.name + " used " + self.name + "!")
+        if player:
+            print(attacker.name + " used " + self.name + "!")
+        else:
+            print("The enemy " + attacker.name + " used " + self.name + "!")
         if effectiveness is 0:
             print("It does not affect " + defender.name + "...")
         elif effectiveness is 1:
@@ -243,12 +254,12 @@ class Move:
             print("It's not very effective...")
             
 
-    def use(self, attacker, defender):
+    def use(self, attacker, defender, player):
             if self.pp <= 0:
                 print("You don't have enough PP to use that move!")
             else:
                 self.pp -= 1
-                return self.damageFunc(attacker, defender)
+                return self.damageFunc(attacker, defender, player)
 
 
 class Environment:
@@ -292,7 +303,10 @@ class Type:
         self.typeName = typeName 
     
     def __eq__(self, other):
-        return self.typeName is other.typeName
+        if other and self:
+            return self.typeName is other.typeName
+        else:
+            return False
     
     def setEffectiveTypes(self, typeEffective):
         self.typeEffective = typeEffective
@@ -330,23 +344,23 @@ def setTypes(type, effectiveTypes, notEffectiveTypes, immuneTypes):
     type.setImmuneTypes(immuneTypes)
 
 # Setting type effectiveness
-setTypes(fighting, [normal, rock, steel, ice, dark], [flying, poison, bug, psychic, fairy], ghost)
-setTypes(flying, [fighting, bug, grass], [rock, steel, electric], None)
-setTypes(poison, [grass, fairy], [poison, ground, rock, ghost], steel)
-setTypes(ground, [poison, rock, steel, fire, electric], [bug, grass], flying)
-setTypes(rock, [flying, bug, fire, ice], [fighting, ground, steel], None)
-setTypes(bug, [grass, psychic, dark], [fighting, flying, poison, ghost, steel, fire, fairy], None)
-setTypes(ghost, [ghost, psychic], [dark], normal)
-setTypes(steel, [rock, ice, fairy], [steel, fire, water, electric], None)
-setTypes(fire, [bug, steel, grass, ice], [rock, fire, water, dragon], None)
-setTypes(water, [ground, rock, fire], [water, grass, dragon], None)
-setTypes(grass, [ground, rock, water], [flying, poison, bug, steel, fire, grass, dragon], None)
-setTypes(electric, [flying, water], [grass, electric, dragon], ground)
-setTypes(psychic, [fighting, poison], [steel, psychic], dark)
-setTypes(ice, [flying, ground, grass, dragon], [steel, fire, water, ice], dark)
-setTypes(dragon, [dragon], [steel], fairy)
-setTypes(dark, [ghost, psychic], [fighting, dark, fairy], None)
-setTypes(fairy, [fighting, dragon, dark], [poison, steel, fire], None)
+setTypes(fighting, [normal, rock, steel, ice, dark], [flying, poison, bug, psychic, fairy], [ghost])
+setTypes(flying, [fighting, bug, grass], [rock, steel, electric], [None])
+setTypes(poison, [grass, fairy], [poison, ground, rock, ghost], [steel])
+setTypes(ground, [poison, rock, steel, fire, electric], [bug, grass], [flying])
+setTypes(rock, [flying, bug, fire, ice], [fighting, ground, steel], [None])
+setTypes(bug, [grass, psychic, dark], [fighting, flying, poison, ghost, steel, fire, fairy], [None])
+setTypes(ghost, [ghost, psychic], [dark], [normal])
+setTypes(steel, [rock, ice, fairy], [steel, fire, water, electric], [None])
+setTypes(fire, [bug, steel, grass, ice], [rock, fire, water, dragon], [None])
+setTypes(water, [ground, rock, fire], [water, grass, dragon], [None])
+setTypes(grass, [ground, rock, water], [flying, poison, bug, steel, fire, grass, dragon], [None])
+setTypes(electric, [flying, water], [grass, electric, dragon], [ground])
+setTypes(psychic, [fighting, poison], [steel, psychic], [dark])
+setTypes(ice, [flying, ground, grass, dragon], [steel, fire, water, ice], [dark])
+setTypes(dragon, [dragon], [steel], [fairy])
+setTypes(dark, [ghost, psychic], [fighting, dark, fairy], [None])
+setTypes(fairy, [fighting, dragon, dark], [poison, steel, fire], [None])
 
 # list of all types 
 types = [normal, fighting, flying, poison, ground, rock, bug, ghost, steel, fire, water, grass, electric, psychic, dragon, dark, fairy]
@@ -386,13 +400,13 @@ while True:
         print("5. Go Back")
         userInput = int(input("What will you do? "))
         if userInput is 1:
-            player.activePokemon.moves.useMove1().use(player.activePokemon, enemy.activePokemon)
+            player.activePokemon.moves.useMove1().use(player.activePokemon, enemy.activePokemon, True)
         elif userInput is 2:
-            player.activePokemon.moves.useMove2().use(player.activePokemon, enemy.activePokemon)
+            player.activePokemon.moves.useMove2().use(player.activePokemon, enemy.activePokemon, True)
         elif userInput is 3:
-            player.activePokemon.moves.useMove3().use(player.activePokemon, enemy.activePokemon)
+            player.activePokemon.moves.useMove3().use(player.activePokemon, enemy.activePokemon, True)
         elif userInput is 4:
-            player.activePokemon.moves.useMove4().use(player.activePokemon, enemy.activePokemon)
+            player.activePokemon.moves.useMove4().use(player.activePokemon, enemy.activePokemon, True)
         else: 
             continue
     elif userInput is 2:
@@ -427,4 +441,39 @@ while True:
 
     # enemy chooses option
     
+    # I am going to make a simple AI for now that just attacks randomly. I could program a complex one that 
+    # switches pokemon based on what the user's pokemon is, but that would take a while.
+
+    noMove1 = False
+    noMove2 = False
+    noMove3 = False
+    noMove4 = False
+
+    while True:
+        rand = random.random()
+        if noMove1:
+            if rand >= 0 and rand < 0.25:
+                continue
+        if noMove2:
+            if rand >= 0.25 and rand < 0.5:
+                continue
+        if noMove3:
+            if rand >= 0.5 and rand < 0.75:
+                continue
+        if noMove4:     
+            if rand >= 0.75 and rand <= 1:
+                continue 
+        break
+
+    if rand >= 0 and rand < 0.25:
+        enemy.activePokemon.moves.useMove1().use(enemy.activePokemon, player.activePokemon, False)
+    elif rand >= 0.25 and rand < 0.5:
+        enemy.activePokemon.moves.useMove2().use(enemy.activePokemon, player.activePokemon, False)
+    elif rand >= 0.5 and rand < 0.75:
+        enemy.activePokemon.moves.useMove3().use(enemy.activePokemon, player.activePokemon, False)
+    elif rand >= 0.75 and rand <= 1: 
+        enemy.activePokemon.moves.useMove4().use(enemy.activePokemon, player.activePokemon, False)
+    else:
+        print("The enemy has no moves left!")
+
 
