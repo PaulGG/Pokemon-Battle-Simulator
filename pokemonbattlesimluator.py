@@ -14,7 +14,7 @@ class Player:
  
 class Pokemon: 
     def __init__(self, hpStat, attackStat, defenseStat, spAttackStat, spDefenseStat, speedStat, hp, xp, level, moves, attack, spAttack, defense, spDefense, speed, type1, type2, hpIV, attackIV, defenseIV, spAttackIV, spDefenseIV, speedIV
-        , hpEV, attackEV, defenseEV, spAttackEV, spDefenseEV, speedEV, nature, growthRate): 
+        , hpEV, attackEV, defenseEV, spAttackEV, spDefenseEV, speedEV, nature, growthRate, passive, healthStatus): 
         # all stats must be betweeen 1 and 255
         self.hpStat = hpStat
         self.attackStat = attackStat
@@ -49,6 +49,12 @@ class Pokemon:
         # Initial level for a pokemon
         self.level = level
         # All of these are calculated with mathematical equations
+        
+        # passives are..a thing
+        self.passive = passive
+
+        # health status is like burn, paralyzed, etc.
+        self.healthStatus = healthStatus
         self.hp = ((2 * hpStat + hpIV + hpEV / 4 + 100) * level) / 100 + 10
         self.moves = moves
         self.attack = (((2 * attackStat + attackIV + attackEV / 4) * level) / 100 + 5) * nature
@@ -111,12 +117,103 @@ class Pokemon:
             
  
 class Move: 
-    def __init__(self, power, damageType, type):
+    def __init__(self, power, damageType, type, pp):
         self.power = power
         self.damageType = damageType
         self.type = type
-
+        self.pp = pp
     
+    def damageFunc(attacker, defender):
+        targets = 1
+        weather = determineWeatherMoveDamage()
+        critical = determineCrit()
+        rando = determineRandom()
+        STAB = determineSTAB()
+        effectiveness = determineEffectiveness()
+        burn = determineBurn()
+        # TODO: other is an item effect
+        other = 1
+        modifier = targets * weather * critical * rando * STAB * effectiveness * burn * other
+        damage = ((((2 * attacker.level) / 5 + 2) * power * (attacker.attack / defender.defense)) / 50 + 2) * modifier
+
+    def determineWeatherMoveDamage():
+        if type is "water" and environment.getWeather() is "raining":
+            return 1.5
+        elif type is "fire" and environment.getWeather() is "harsh_sunlight":
+            return 1.5
+        elif type is "water" and environment.getWeather() is "harsh_sunlight":
+            return 0.5
+        elif type is "fire" and environment.getWeather() is "raining":
+            return 0.5
+        else:
+            return 1
+
+    def use():
+        if pp <= 0:
+            print("You don't have enough PP to use that move!")
+        else:
+            pp--
+            damageDealt = damageFunc()
+    
+    def determineCrit():
+
+    def determineRandom():
+        i = random.random()
+        return i >= 0.85 and i <= 1.00 ? i : determineRandom()
+
+    def determineSTAB():
+        #TODO: possibly make passive into an objet
+        if attacker.passive is "adaptability":
+            return 2
+        elif type is attacker.type1 or type is attacker.type2:
+            return 1.5
+        else:
+            return 1
+
+    def determineEffectiveness():
+        if defender.type1 or defender.type2 in type.typeEffective:
+            if defender.type1 and defender.type2 in type.typeEffective:
+                return 4
+            else:
+                return 2
+        elif defender.type1 or defender.type2 in type.typeNotEffective:
+            if defender.type1 and defender.type2 in typeNotEffective:
+                return 0.25
+            else:
+                return 0.5
+        elif defender.type1 or defender.type2 in type.typeImmunities:
+            if defender.type2 is None and defender.type1 in type.typeImmunities:
+                return 0
+            elif defender.type1 is None and defender.type2 in type.typeImmunities:
+                return 0
+        else: return 1
+
+    def determineBurn():
+        # TODO: healthStatus as object
+        if attacker.healthStatus is "burned" and attacker.passive is not "guts" and damageType is "physical":
+            return 0.5
+        else: 
+            return 1
+        
+class Environment:
+    # All possible weather values are: Hail, Sandstorm, Rain, and Harsh Sunlight
+    def __init__(self):
+        self.value = "clear"
+    
+    def setRaining():
+        value = "raining"
+    
+    def setHarshSunny():
+        value = "harsh_sunlight"
+    
+    def setHailing():
+        value = "hailing"
+    
+    def setSandstorm():
+        value = "sandstorm"
+
+    def getWeather():
+        return value
 
 class MoveSet:
     def __init__(self, move1, move2, move3, move4):
@@ -133,10 +230,7 @@ class MoveSet:
         return move3
     def useMove4():
         return move4
-    
 
- 
- 
 class Type: 
     def __init__(self, typeName): 
         self.typeName = typeName 
@@ -198,3 +292,4 @@ setTypes(fairy, [fighting, dragon, dark], [poison, steel, fire], None)
 # list of all types 
 types = [normal, fighting, flying, poison, ground, rock, bug, ghost, steel, fire, water, grass, electric, psychic, dragon, dark, fairy]
 
+environment = Environment()
