@@ -4,11 +4,6 @@ import random
 import copy
 import abc
 
-class Nature(Enum):
-    GOOD = 1.1
-    NEUTRAL = 1.0
-    BAD = 0.9
-
 class Player: 
     def __init__(self, pokemon, backpack): 
         self.pokemon = pokemon 
@@ -46,9 +41,6 @@ class FullRestore(Item):
         user.hp = user.maxHp
         print("You used the full restore.")
         print("Restored HP to " + str(user.hp) + ".")
-    
-
-
 
 class Pokemon:
     def __init__(self, name, hpStat, attackStat, defenseStat, spAttackStat, spDefenseStat, speedStat, level, moves, type1, type2, hpIV, 
@@ -522,7 +514,15 @@ def determineDead(playerPokemon, enemyPokemon):
                     activePokemons.append(pokemon)
                     print(str(i) + ". " + pokemon.name)
                     i += 1
-            userInput = int(input("Please select a Pokemon. "))
+            userInput = None
+            while True:
+                try:
+                    userInput = int(input("Please select a Pokemon. "))
+                    if userInput > len(activePokemons): print("That selection does not exist!")
+                    else: break
+                except ValueError:
+                    print("Invalid Input!")
+            
             select = player.pokemon[userInput - 1]
             if select.fainted is False:
                 player.activePokemon = select
@@ -532,16 +532,20 @@ def determineDead(playerPokemon, enemyPokemon):
                 print("You cannot select a fainted pokemon!")
     
     
-
 # GAME LOOP
 while not won:
     # player chooses option
-    print("Pokemon Status: " + player.activePokemon.name + " " + str(player.activePokemon.hp))
-    print("Enemy Pokemon Status: " + enemy.activePokemon.name + " " + str(enemy.activePokemon.hp))
+    print("Pokemon Status: " + player.activePokemon.name + " " + str(player.activePokemon.hp) + " | Level: " + str(player.activePokemon.level))
+    print("Enemy Pokemon Status: " + enemy.activePokemon.name + " " + str(enemy.activePokemon.hp)+ " | Level: " + str(enemy.activePokemon.level))
     print("1. Fight")
     print("2. Bag")
     print("3. Pokemon")
-    userInput = int(input("What will you do? "))
+    while True:
+        try:
+            userInput = int(input("What will you do? "))
+            break
+        except ValueError:
+            print("Invalid input!")
 
 
     if userInput is 1:
@@ -582,8 +586,14 @@ while not won:
                 print(str(i) + ". " + item.name)
                 i += 1
             print(str(i) + ". Go Back" )
-            userInput = int(input("What will you do? "))
-            if userInput > len(items):
+            userInput = None
+            while True:
+                try:
+                    userInput = int(input("What will you do? "))
+                    break
+                except ValueError:
+                    print("Invalid input!")
+            if userInput > len(items) or userInput < 1:
                 # go back
                 continue
             else:
@@ -615,12 +625,18 @@ while not won:
                     activePokemons.append(pokemon)
                     print(str(i) + ". " + pokemon.name)
                     i += 1
-            userInput = int(input("Please select a Pokemon. "))
+            while True:
+                try:
+                    userInput = int(input("Please select a Pokemon. "))
+                    if userInput > len(activePokemons): print("That selection does not exist!")
+                    else: break
+                except ValueError:
+                    print("Invalid Input!")
             select = player.pokemon[userInput - 1]
             if select.fainted is False:
                 player.activePokemon = select
                 print("Go! " + player.activePokemon.name + "!")
+                enemyAttack(player.activePokemon, enemy.activePokemon)
+                break
             else:
                 print("You cannot select a fainted pokemon!")
-        
-
