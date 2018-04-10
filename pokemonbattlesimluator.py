@@ -1,6 +1,7 @@
 from enum import Enum
 import math
 import random
+import copy
 
 class Nature(Enum):
     GOOD = 1.1
@@ -11,7 +12,21 @@ class Player:
     def __init__(self, pokemon, backpack): 
         self.pokemon = pokemon 
         self.backpack = backpack 
+        self.activePokemon = pokemon[0]
  
+class Backpack:
+    def __init__(self, items):
+        self.items = items
+
+    def getAllItems(self):
+        return self.items
+
+class Item:
+    def __init__(self, name, effect):
+        self.name = name
+        self.effect = effect
+    
+
 class Pokemon:
     def __init__(self, name, hpStat, attackStat, defenseStat, spAttackStat, spDefenseStat, speedStat, level, moves, type1, type2, hpIV, 
         attackIV, defenseIV, spAttackIV, spDefenseIV, speedIV, hpEV, attackEV, defenseEV, spAttackEV, spDefenseEV, speedEV, nature, 
@@ -27,7 +42,6 @@ class Pokemon:
         # type
         self.type1 = type1
         self.type2 = type2
-
 
         # an IV must be between 0 and 31
         self.hpIV = hpIV
@@ -179,20 +193,18 @@ class Move:
             return 1
 
     def determineEffectiveness(self, attacker, defender):
-        if defender.type1 or defender.type2 in self.type.typeEffective:
-            if defender.type1 and defender.type2 in self.type.typeEffective:
+        if defender.type1 in self.type.typeEffective or defender.type2 in self.type.typeEffective:
+            if defender.type1 in self.type.typeEffective and defender.type2 in self.type.typeEffective:
                 return 4
             else:
                 return 2
-        elif defender.type1 or defender.type2 in self.type.typeNotEffective:
-            if defender.type1 and defender.type2 in self.type.typeNotEffective:
+        elif defender.type1 in self.type.typeNotEffective or defender.type2 in self.type.typeNotEffective:
+            if defender.type1 in self.type.typeNotEffective and defender.type2 in self.type.typeNotEffective:
                 return 0.25
             else:
                 return 0.5
-        elif defender.type1 or defender.type2 in self.type.typeImmunities:
-            if defender.type2 is None and defender.type1 in self.type.typeImmunities:
-                return 0
-            elif defender.type1 is None and defender.type2 in self.type.typeImmunities:
+        elif self.type.typeImmunities:
+            if defender.type1 in self.type.typeImmunities or defender.type2 in self.type.typeImmunities:
                 return 0
         else: return 1
 
@@ -216,9 +228,20 @@ class Move:
         
         modifier = targets * weather * critical * rando * STAB * effectiveness * burn * other
         if self.damageType is "physical":
-            return ((((2 * attacker.level) / 5 + 2) * self.power * (attacker.attack / defender.defense)) / 50 + 2) * modifier
+            defender.hp -= round(((((2 * attacker.level) / 5 + 2) * self.power * (attacker.attack / defender.defense)) / 50 + 2) * modifier)
         else: 
-            return ((((2 * attacker.level) / 5 + 2) * self.power * (attacker.spAttack / defender.spDefense)) / 50 + 2) * modifier
+            defender.hp -= round(((((2 * attacker.level) / 5 + 2) * self.power * (attacker.spAttack / defender.spDefense)) / 50 + 2) * modifier)
+        
+        print(attacker.name + " used " + self.name + "!")
+        if effectiveness is 0:
+            print("It does not affect " + defender.name + "...")
+        elif effectiveness is 1:
+            print("It had normal effectiveness.")
+        elif effectiveness > 1:
+            print("It's super effective!")
+        elif effectiveness < 1:
+            print("It's not very effective...")
+            
 
     def use(self, attacker, defender):
             if self.pp <= 0:
@@ -267,6 +290,9 @@ class MoveSet:
 class Type: 
     def __init__(self, typeName): 
         self.typeName = typeName 
+    
+    def __eq__(self, other):
+        return self.typeName is other.typeName
     
     def setEffectiveTypes(self, typeEffective):
         self.typeEffective = typeEffective
@@ -328,12 +354,77 @@ types = [normal, fighting, flying, poison, ground, rock, bug, ghost, steel, fire
 environment = Environment()
 
 
-earthquake = Move("earthquake", 100, 100, "physical", ground, 10)
-charizard = Pokemon("charizard", 78, 84, 78, 109, 85, 100, 50, MoveSet(Move("flamethrower", 90, 100, "special", fire, 15), Move("earthquake", 100, 100, 
-"physical", ground, 10), Move("dragon_pulse", 85, 100, "special", dragon, 10), Move("rock_slide", 75, 90, "physical", rock, 10)), fire, flying, 31, 31, 
+earthquake = Move("Earthquake", 100, 100, "physical", ground, 10)
+charizard = Pokemon("Charizard", 78, 84, 78, 109, 85, 100, 50, MoveSet(Move("Flamethrower", 90, 100, "special", fire, 15), earthquake, 
+Move("Dragon Pulse", 85, 100, "special", dragon, 10), Move("Rock Slide", 75, 90, "physical", rock, 10)), fire, flying, 31, 31, 
 31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1, "medium_slow", "something", None, None)
-venusaur = Pokemon("venusaur", 80, 82, 83, 100, 100, 80, 50, MoveSet(Move("solar_beam", 120, 100, "special", grass, 10), earthquake, Move("hidden_power", 
-60, 100, "special", grass, 15), Move("energy_ball", 90, 100, "special", grass, 10)), grass, poison, 31, 31, 31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1, 
+venusaur = Pokemon("Venusaur", 80, 82, 83, 100, 100, 80, 50, MoveSet(Move("Solar Beam", 120, 100, "special", grass, 10), earthquake, Move("Hidden Power", 
+60, 100, "special", grass, 15), Move("Energy Ball", 90, 100, "special", grass, 10)), grass, poison, 31, 31, 31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1, 
 "medium_slow", "something", None, None)
 
-print(str(charizard.moves.useMove1().use(charizard, venusaur)))
+
+player = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], None)
+enemy = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], None)
+
+
+print("The enemy sends out " + enemy.pokemon[0].name + ".")
+print("Go! " + player.activePokemon.name + "!")
+
+while True:
+    # player chooses option
+    print("Pokemon Status: " + player.activePokemon.name + " " + str(player.activePokemon.hp))
+    print("Enemy Pokemon Status: " + enemy.activePokemon.name + " " + str(enemy.activePokemon.hp))
+    print("1. Fight")
+    print("2. Bag")
+    print("3. Pokemon")
+    userInput = int(input("What will you do? "))
+    if userInput is 1:
+        print("1. " + player.activePokemon.moves.move1.name + " (" + "PP: " + str(player.activePokemon.moves.move1.pp) +")")
+        print("2. " + player.activePokemon.moves.move2.name + " (" + "PP: " + str(player.activePokemon.moves.move2.pp) +")")
+        print("3. "+ player.activePokemon.moves.move3.name + " (" + "PP: " + str(player.activePokemon.moves.move3.pp) +")")
+        print("4. " + player.activePokemon.moves.move4.name + " (" + "PP: " + str(player.activePokemon.moves.move4.pp) +")")
+        print("5. Go Back")
+        userInput = int(input("What will you do? "))
+        if userInput is 1:
+            player.activePokemon.moves.useMove1().use(player.activePokemon, enemy.activePokemon)
+        elif userInput is 2:
+            player.activePokemon.moves.useMove2().use(player.activePokemon, enemy.activePokemon)
+        elif userInput is 3:
+            player.activePokemon.moves.useMove3().use(player.activePokemon, enemy.activePokemon)
+        elif userInput is 4:
+            player.activePokemon.moves.useMove4().use(player.activePokemon, enemy.activePokemon)
+        else: 
+            continue
+    elif userInput is 2:
+        if player.backpack:
+            items = player.backpack.getAllItems()
+            i = 1
+            for item in items:
+                print(i + ". " + item.name)
+                i += 1
+            print(str(i) + ". Go Back" )
+            userInput = int(input("What will you do? "))
+            if userInput > len(items):
+                # go back
+                continue
+            else:
+                selectedItem = items[userInput]
+    else:
+        i = 1
+        activePokemons = []
+        for pokemon in player.pokemon:
+            if pokemon:
+                activePokemons.append(pokemon)
+                print(str(i) + ". " + pokemon.name)
+                i += 1
+        print(str(i) + ". Go Back")
+        userInput = int(input("What will you do? "))
+        if userInput > len(activePokemons):
+            continue
+        else:
+            player.activePokemon = player.pokemon[userInput - 1]
+
+
+    # enemy chooses option
+    
+
