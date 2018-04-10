@@ -115,7 +115,7 @@ class Pokemon:
             if self.level >= 100:
                 level = 100
             else:
-                requiredXP = (((6 / 5) * (level + 1) ** 3) - (15 * (level + 1) ** 2) + 100 * (level + 1) - 140) - 
+                requiredXP = (((6 / 5) * (level + 1) ** 3) - (15 * (level + 1) ** 2) + 100 * (level + 1) - 140) -\
                 (((6 / 5) * (level) ** 3) - (15 * (level) ** 2) + 100 * (level) - 140)
                 self.levelSetter(requiredXP)
         
@@ -160,7 +160,7 @@ class Move:
             determiner = 0.125
         else:
             determiner = 0.0625
-        return 1.5 if determiner <= random.random() else 1
+        return 1.5 if random.random() <= determiner else 1
 
     def determineRandom(self, attacker, defender):
         i = random.random()
