@@ -2,6 +2,7 @@ from enum import Enum
 import math
 import random
 import copy
+import abc
 
 class Nature(Enum):
     GOOD = 1.1
@@ -12,7 +13,10 @@ class Player:
     def __init__(self, pokemon, backpack): 
         self.pokemon = pokemon 
         self.backpack = backpack 
-        self.activePokemon = pokemon[0]
+        for p in pokemon:
+            if p.fainted is False:
+                self.activePokemon = p
+                break
  
 class Backpack:
     def __init__(self, items):
@@ -21,11 +25,30 @@ class Backpack:
     def getAllItems(self):
         return self.items
 
+    def useItem(self, index, user):
+        items[index].use(user)
+        del items[index]
+
 class Item:
-    def __init__(self, name, effect):
+    def __init__(self, name):
         self.name = name
-        self.effect = effect
+
+    @abc.abstractmethod
+    def use(self, user):
+        """Please define what the item will do in this function."""
+        return
     
+class FullRestore(Item):
+    def __init__(self):
+        Item.__init__(self, "Full Restore")
+    
+    def use(self, user):
+        user.hp = user.maxHp
+        print("You used the full restore.")
+        print("Restored HP to " + str(user.hp) + ".")
+    
+
+
 
 class Pokemon:
     def __init__(self, name, hpStat, attackStat, defenseStat, spAttackStat, spDefenseStat, speedStat, level, moves, type1, type2, hpIV, 
@@ -80,12 +103,20 @@ class Pokemon:
 
         # All of these are calculated with mathematical equations
         self.hp = ((2 * hpStat + hpIV + hpEV / 4 + 100) * level) / 100 + 10
+        self.maxHp = self.hp
         self.moves = moves
         self.attack = (((2 * attackStat + attackIV + attackEV / 4) * level) / 100 + 5) * nature
+        self.defaultAttack = self.attack
         self.spAttack = (((2 * spAttackStat + spAttackIV + spAttackEV / 4) * level) / 100 + 5) * nature
+        self.defaultSpAttack = self.spAttack
         self.defense = (((2 * defenseStat + defenseIV + defenseEV / 4) * level) / 100 + 5) * nature
+        self.defaultDefense = self.defense
         self.spDefense = (((2 * spDefenseStat + spDefenseIV + spDefenseEV / 4) * level) / 100 + 5) * nature
+        self.defaultSpDefense = self.spDefense
         self.speed = (((2 * speedStat + speedIV + speedEV / 4) * level) / 100 + 5) * nature
+        self.defaultSpeed = self.speed
+
+        self.fainted = True if self.hp <= 0 else False
 
         def levelSetter(self, requiredXP):
             if self.xp >= requiredXP:
@@ -233,12 +264,20 @@ class Move:
         burn = self.determineBurn(attacker, defender)
         # TODO: other is an item effect
         other = 1
-        
+
+
         modifier = targets * weather * critical * rando * STAB * effectiveness * burn * other
         if self.damageType is "physical":
             defender.hp -= round(((((2 * attacker.level) / 5 + 2) * self.power * (attacker.attack / defender.defense)) / 50 + 2) * modifier)
+            # Makes sure HP can never go below 0.
+            if defender.hp <= 0:
+                defender.hp = 0
+                defender.fainted = True
         else: 
             defender.hp -= round(((((2 * attacker.level) / 5 + 2) * self.power * (attacker.spAttack / defender.spDefense)) / 50 + 2) * modifier)
+            if defender.hp <= 0:
+                defender.hp = 0
+                defender.fainted = True
         
         if player:
             print(attacker.name + " used " + self.name + "!")
@@ -367,6 +406,7 @@ types = [normal, fighting, flying, poison, ground, rock, bug, ghost, steel, fire
 
 environment = Environment()
 
+# Adding two pokemon to test everything.
 
 earthquake = Move("Earthquake", 100, 100, "physical", ground, 10)
 charizard = Pokemon("Charizard", 78, 84, 78, 109, 85, 100, 50, MoveSet(Move("Flamethrower", 90, 100, "special", fire, 15), earthquake, 
@@ -377,77 +417,42 @@ venusaur = Pokemon("Venusaur", 80, 82, 83, 100, 100, 80, 50, MoveSet(Move("Solar
 "medium_slow", "something", None, None)
 
 
-player = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], None)
+player = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], Backpack([FullRestore(), FullRestore(), FullRestore()]))
 enemy = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], None)
 
 
-print("The enemy sends out " + enemy.pokemon[0].name + ".")
+print("The enemy sends out " + enemy.activePokemon.name + ".")
 print("Go! " + player.activePokemon.name + "!")
 
-while True:
-    # player chooses option
-    print("Pokemon Status: " + player.activePokemon.name + " " + str(player.activePokemon.hp))
-    print("Enemy Pokemon Status: " + enemy.activePokemon.name + " " + str(enemy.activePokemon.hp))
-    print("1. Fight")
-    print("2. Bag")
-    print("3. Pokemon")
-    userInput = int(input("What will you do? "))
-    if userInput is 1:
-        print("1. " + player.activePokemon.moves.move1.name + " (" + "PP: " + str(player.activePokemon.moves.move1.pp) +")")
-        print("2. " + player.activePokemon.moves.move2.name + " (" + "PP: " + str(player.activePokemon.moves.move2.pp) +")")
-        print("3. "+ player.activePokemon.moves.move3.name + " (" + "PP: " + str(player.activePokemon.moves.move3.pp) +")")
-        print("4. " + player.activePokemon.moves.move4.name + " (" + "PP: " + str(player.activePokemon.moves.move4.pp) +")")
-        print("5. Go Back")
-        userInput = int(input("What will you do? "))
-        if userInput is 1:
-            player.activePokemon.moves.useMove1().use(player.activePokemon, enemy.activePokemon, True)
-        elif userInput is 2:
-            player.activePokemon.moves.useMove2().use(player.activePokemon, enemy.activePokemon, True)
-        elif userInput is 3:
-            player.activePokemon.moves.useMove3().use(player.activePokemon, enemy.activePokemon, True)
-        elif userInput is 4:
-            player.activePokemon.moves.useMove4().use(player.activePokemon, enemy.activePokemon, True)
-        else: 
-            continue
-    elif userInput is 2:
-        if player.backpack:
-            items = player.backpack.getAllItems()
-            i = 1
-            for item in items:
-                print(i + ". " + item.name)
-                i += 1
-            print(str(i) + ". Go Back" )
-            userInput = int(input("What will you do? "))
-            if userInput > len(items):
-                # go back
-                continue
-            else:
-                selectedItem = items[userInput]
-    else:
-        i = 1
-        activePokemons = []
-        for pokemon in player.pokemon:
-            if pokemon:
-                activePokemons.append(pokemon)
-                print(str(i) + ". " + pokemon.name)
-                i += 1
-        print(str(i) + ". Go Back")
-        userInput = int(input("What will you do? "))
-        if userInput > len(activePokemons):
-            continue
+def orderDeterminer(playerPokemon, enemyPokemon):
+    # Order is random if both pokemon's speed stats are identical.
+    if playerPokemon.speed is enemyPokemon.speed:
+        ran = random.random()
+        if ran >= 0 and ran <= 0.5:
+            return False
         else:
-            player.activePokemon = player.pokemon[userInput - 1]
+            return True
+    elif playerPokemon.speed > enemyPokemon.speed:
+        return True
+    else:
+        return False 
 
+def playerAttack(moveIndex, playerPokemon, enemyPokemon):
+    if moveIndex is 1:
+        playerPokemon.moves.useMove1().use(playerPokemon, enemyPokemon, True)
+    elif moveIndex is 2:
+        playerPokemon.moves.useMove2().use(playerPokemon, enemyPokemon, True)
+    elif moveIndex is 3:
+        playerPokemon.moves.useMove3().use(playerPokemon, enemyPokemon, True)
+    else:
+        playerPokemon.moves.useMove4().use(playerPokemon, enemyPokemon, True)
 
-    # enemy chooses option
     
-    # I am going to make a simple AI for now that just attacks randomly. I could program a complex one that 
-    # switches pokemon based on what the user's pokemon is, but that would take a while.
-
-    noMove1 = False
-    noMove2 = False
-    noMove3 = False
-    noMove4 = False
+def enemyAttack(playerPokemon, enemyPokemon):
+    noMove1 = enemyPokemon.moves.move1.pp <= 0
+    noMove2 = enemyPokemon.moves.move2.pp <= 0
+    noMove3 = enemyPokemon.moves.move3.pp <= 0
+    noMove4 = enemyPokemon.moves.move4.pp <= 0
 
     while True:
         rand = random.random()
@@ -465,6 +470,7 @@ while True:
                 continue 
         break
 
+        # ATTACK DETERMINATION!
     if rand >= 0 and rand < 0.25:
         enemy.activePokemon.moves.useMove1().use(enemy.activePokemon, player.activePokemon, False)
     elif rand >= 0.25 and rand < 0.5:
@@ -476,4 +482,145 @@ while True:
     else:
         print("The enemy has no moves left!")
 
+won = False
+
+def checkForAlivePokemon(player):
+    for p in player.pokemon:
+        if p:
+            if p.fainted is False:
+                return True
+    return False
+
+def determineDead(playerPokemon, enemyPokemon):
+    if enemyPokemon.fainted:
+        print("The enemy's " + enemy.activePokemon.name + " fainted!")
+        for p in enemy.pokemon:
+            if p:
+                if p.fainted is False:
+                    enemy.activePokemon = p
+                    break;
+        # TODO: BETTER ENDGAME
+        if enemy.activePokemon.fainted:
+            print("The enemy has no more pokemon! You win!")
+            global won
+            won = True
+        else:
+            print("The enemy sent out " + enemy.activePokemon.name + "!")
+        return True
+    
+    if player.activePokemon.fainted:
+        print(player.activePokemon.name + " fainted!")
+        while True:   
+            if not checkForAlivePokemon(player): 
+                print("You have no more pokemon! You lose. :(")
+                won = True
+                break
+            i = 1
+            activePokemons = []
+            for pokemon in player.pokemon:
+                if pokemon:
+                    activePokemons.append(pokemon)
+                    print(str(i) + ". " + pokemon.name)
+                    i += 1
+            userInput = int(input("Please select a Pokemon. "))
+            select = player.pokemon[userInput - 1]
+            if select.fainted is False:
+                player.activePokemon = select
+                print("Go! " + player.activePokemon.name + "!")
+                return True
+            else:
+                print("You cannot select a fainted pokemon!")
+    
+    
+
+# GAME LOOP
+while not won:
+    # player chooses option
+    print("Pokemon Status: " + player.activePokemon.name + " " + str(player.activePokemon.hp))
+    print("Enemy Pokemon Status: " + enemy.activePokemon.name + " " + str(enemy.activePokemon.hp))
+    print("1. Fight")
+    print("2. Bag")
+    print("3. Pokemon")
+    userInput = int(input("What will you do? "))
+
+
+    if userInput is 1:
+        print("1. " + player.activePokemon.moves.move1.name + " (" + "PP: " + str(player.activePokemon.moves.move1.pp) +")")
+        print("2. " + player.activePokemon.moves.move2.name + " (" + "PP: " + str(player.activePokemon.moves.move2.pp) +")")
+        print("3. "+ player.activePokemon.moves.move3.name + " (" + "PP: " + str(player.activePokemon.moves.move3.pp) +")")
+        print("4. " + player.activePokemon.moves.move4.name + " (" + "PP: " + str(player.activePokemon.moves.move4.pp) +")")
+        print("5. Go Back")
+        userInput = int(input("What will you do? "))
+        # ATTACK DETERMINATION!
+        if userInput not in [1, 2, 3, 4]:
+            continue
+        else: 
+            if orderDeterminer(player.activePokemon, enemy.activePokemon):
+                playerAttack(userInput, player.activePokemon, enemy.activePokemon)
+                # is enemy pokemon dead?
+                if determineDead(player.activePokemon, enemy.activePokemon):
+                    if won: break
+                    continue
+                    
+                else:
+                    enemyAttack(player.activePokemon, enemy.activePokemon)
+                    if determineDead(player.activePokemon, enemy.activePokemon):
+                        if won: break
+            else:
+                enemyAttack(player.activePokemon, enemy.activePokemon)
+                if determineDead(player.activePokemon, enemy.activePokemon):
+                    if won: break
+                else: 
+                    playerAttack(userInput, player.activePokemon, enemy.activePokemon)
+                    if determineDead(player.activePokemon, enemy.activePokemon):
+                        if won: break
+    elif userInput is 2:
+        if player.backpack:
+            items = player.backpack.getAllItems()
+            i = 1
+            for item in items:
+                print(str(i) + ". " + item.name)
+                i += 1
+            print(str(i) + ". Go Back" )
+            userInput = int(input("What will you do? "))
+            if userInput > len(items):
+                # go back
+                continue
+            else:
+                while True:   
+                    j = 1
+                    activePokemons = []
+                    for pokemon in player.pokemon:
+                        if pokemon:
+                            activePokemons.append(pokemon)
+                            print(str(j) + ". " + pokemon.name)
+                            j += 1
+                    userInput2 = int(input("Please select a pokemon for that item. "))
+                    select = player.pokemon[userInput2 - 1]
+                    if select.fainted is False:
+                         player.backpack.useItem(userInput - 1, select)
+                         break
+                    else:
+                        print("You cannot select a fainted pokemon!")
+                enemyAttack(player.activePokemon, enemy.activePokemon)
+                if determineDead(player.activePokemon, enemy.activePokemon):
+                    if won: break
+
+    else:
+        while True:   
+            i = 1
+            activePokemons = []
+            for pokemon in player.pokemon:
+                if pokemon:
+                    activePokemons.append(pokemon)
+                    print(str(i) + ". " + pokemon.name)
+                    i += 1
+            userInput = int(input("Please select a Pokemon. "))
+            select = player.pokemon[userInput - 1]
+            if select.fainted is False:
+                player.activePokemon = select
+                print("Go! " + player.activePokemon.name + "!")
+            else:
+                print("You cannot select a fainted pokemon!")
+        
 
