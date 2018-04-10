@@ -13,8 +13,9 @@ class Player:
         self.backpack = backpack 
  
 class Pokemon:
-    def __init__(self, name, hpStat, attackStat, defenseStat, spAttackStat, spDefenseStat, speedStat, level, moves, type1, type2, hpIV, attackIV, defenseIV, spAttackIV, spDefenseIV, speedIV
-        , hpEV, attackEV, defenseEV, spAttackEV, spDefenseEV, speedEV, nature, growthRate, passive, healthStatus, itemHeld): 
+    def __init__(self, name, hpStat, attackStat, defenseStat, spAttackStat, spDefenseStat, speedStat, level, moves, type1, type2, hpIV, 
+        attackIV, defenseIV, spAttackIV, spDefenseIV, speedIV, hpEV, attackEV, defenseEV, spAttackEV, spDefenseEV, speedEV, nature, 
+        growthRate, passive, healthStatus, itemHeld): 
         self.name = name
         # all stats must be betweeen 1 and 255
         self.hpStat = hpStat
@@ -89,7 +90,8 @@ class Pokemon:
                 requiredXP = (((level + 1) ** 3 * (150 - level + 1)) / 100) - (((level) ** 3 * (150 - level)) / 100)
                 self.levelSetter(requiredXP)
             elif level >= 68 and level < 98:
-                requiredXP = (((level + 1) ** 3 * math.floor((1911 - (10 * level + 1)) / 3)) / 500) - (((level) ** 3 * math.floor((1911 - (10 * level)) / 3)) / 500)
+                requiredXP = (((level + 1) ** 3 * math.floor((1911 - (10 * level + 1)) / 3)) / 500) - (((level) ** 3 
+                * math.floor((1911 - (10 * level)) / 3)) / 500)
                 self.levelSetter(requiredXP)
             elif level >= 98 and level > 100:
                 requiredXP = (((level + 1) ** 3 * (160 - level + 1)) / 100) - (((level) ** 3 * (160 - level)) / 100)
@@ -113,7 +115,8 @@ class Pokemon:
             if self.level >= 100:
                 level = 100
             else:
-                requiredXP = (((6 / 5) * (level + 1) ** 3) - (15 * (level + 1) ** 2) + 100 * (level + 1) - 140) - (((6 / 5) * (level) ** 3) - (15 * (level) ** 2) + 100 * (level) - 140)
+                requiredXP = (((6 / 5) * (level + 1) ** 3) - (15 * (level + 1) ** 2) + 100 * (level + 1) - 140) - 
+                (((6 / 5) * (level) ** 3) - (15 * (level) ** 2) + 100 * (level) - 140)
                 self.levelSetter(requiredXP)
         
         def slowGrowth(self):
@@ -150,7 +153,8 @@ class Move:
         determiner = None
         if attacker.itemHeld in ["razor_claw", "scope_lens"] and attacker.passive is "super_luck" and self.name in ["slash, stone_edge"]:
             determiner = 0.333
-        elif (attacker.itemHeld in ["razor_claw", "scope_lens"] and attacker.passive is "super_luck") or (attacker.itemHeld in ["razor_claw", "scope_lens"] and self.name in ["slash, stone_edge"]) or (attacker.passive is "super_luck" and self.name in ["slash, stone_edge"]):
+        elif (attacker.itemHeld in ["razor_claw", "scope_lens"] and attacker.passive is "super_luck") or (attacker.itemHeld in ["razor_claw", 
+            "scope_lens"] and self.name in ["slash, stone_edge"]) or (attacker.passive is "super_luck" and self.name in ["slash, stone_edge"]):
             determiner = 0.25
         elif attacker.itemHeld in ["razor_claw", "scope_lens"] or attacker.passive is "super_luck" or self.name in ["slash, stone_edge"]:
             determiner = 0.125
@@ -325,7 +329,11 @@ environment = Environment()
 
 
 earthquake = Move("earthquake", 100, 100, "physical", ground, 10)
-charizard = Pokemon("charizard", 78, 84, 78, 109, 85, 100, 50, MoveSet(Move("flamethrower", 90, 100, "special", fire, 15), Move("earthquake", 100, 100, "physical", ground, 10), Move("dragon_pulse", 85, 100, "special", dragon, 10), Move("rock_slide", 75, 90, "physical", rock, 10)), fire, flying, 31, 31, 31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1, "medium_slow", "something", None, None)
-venusaur = Pokemon("venusaur", 80, 82, 83, 100, 100, 80, 50, MoveSet(Move("solar_beam", 120, 100, "special", grass, 10), earthquake, Move("hidden_power", 60, 100, "special", grass, 15), Move("energy_ball", 90, 100, "special", grass, 10)), grass, poison, 31, 31, 31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1, "medium_slow", "something", None, None)
+charizard = Pokemon("charizard", 78, 84, 78, 109, 85, 100, 50, MoveSet(Move("flamethrower", 90, 100, "special", fire, 15), Move("earthquake", 100, 100, 
+"physical", ground, 10), Move("dragon_pulse", 85, 100, "special", dragon, 10), Move("rock_slide", 75, 90, "physical", rock, 10)), fire, flying, 31, 31, 
+31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1, "medium_slow", "something", None, None)
+venusaur = Pokemon("venusaur", 80, 82, 83, 100, 100, 80, 50, MoveSet(Move("solar_beam", 120, 100, "special", grass, 10), earthquake, Move("hidden_power", 
+60, 100, "special", grass, 15), Move("energy_ball", 90, 100, "special", grass, 10)), grass, poison, 31, 31, 31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1, 
+"medium_slow", "something", None, None)
 
 print(str(charizard.moves.useMove1().use(charizard, venusaur)))
