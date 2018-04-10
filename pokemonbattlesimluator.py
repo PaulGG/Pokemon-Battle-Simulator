@@ -81,9 +81,9 @@ class Pokemon:
 
         def erraticGrowth(self):
             if self.level >= 100:
-                level = 100
+                self.level = 100
                 return
-            if level < 50:
+            if self.level < 50:
                 requiredXP = (((level + 1) ** 3 * (100 - level + 1)) / 50) - (((level) ** 3 * (100 - level)) / 50)
                 self.levelSetter(requiredXP)
             elif level >= 50 and level < 68:
@@ -99,21 +99,21 @@ class Pokemon:
         
         def fastGrowth(self):
             if self.level >= 100:
-                level = 100
+                self.level = 100
             else:
                 requiredXP = ((4 * (level + 1) ** 3) / 5) - ((4 * (level) ** 3) / 5)
                 self.levelSetter(requiredXP)
 
         def mediumFastGrowth(self):
             if self.level >= 100:
-                level = 100
+                self.level = 100
             else:
                 requiredXP = (level + 1) ** 3 - level ** 3
                 self.levelSetter(requiredXP)
         
         def mediumSlowGrowth(self):
             if self.level >= 100:
-                level = 100
+                self.level = 100
             else:
                 requiredXP = (((6 / 5) * (level + 1) ** 3) - (15 * (level + 1) ** 2) + 100 * (level + 1) - 140) -\
                 (((6 / 5) * (level) ** 3) - (15 * (level) ** 2) + 100 * (level) - 140)
@@ -121,7 +121,7 @@ class Pokemon:
         
         def slowGrowth(self):
             if self.level >= 100:
-                level = 100
+                self.level = 100
             else:
                 requiredXP = ((5 * (level + 1) ** 3) / 4) - ((5 * (level) ** 3) / 4) 
                 self.levelSetter(requiredXP)
