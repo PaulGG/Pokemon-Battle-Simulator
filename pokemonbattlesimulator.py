@@ -29,7 +29,8 @@ venusaur = Pokemon("Venusaur", 80, 82, 83, 100, 100, 80, 50, MoveSet(Move("Solar
 60, 100, "special", grass, 15), Move("Energy Ball", 90, 100, "special", grass, 10)), grass, poison, 31, 31, 31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1,
 "medium_slow", "something", None, None)
 
-player = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], Backpack([FullRestore(), FullRestore(), FullRestore()]))
+
+player = Player([copy.deepcopy(venusaur), copy.deepcopy(charizard), None, None, None, None], Backpack([FullRestore(), FullRestore(), FullRestore()]))
 enemy = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], None)
 
 def orderDeterminer(playerPokemon, enemyPokemon):
@@ -170,16 +171,39 @@ def playGame():
             except ValueError:
                 print("Invalid input!")
 
+        m1 = True
+        m2 = True
+        m3 = True
+        m4 = True
 
         if userInput is 1:
-            print("1. " + player.activePokemon.moves.move1.name + " (" + "PP: " + str(player.activePokemon.moves.move1.pp) +")")
-            print("2. " + player.activePokemon.moves.move2.name + " (" + "PP: " + str(player.activePokemon.moves.move2.pp) +")")
-            print("3. "+ player.activePokemon.moves.move3.name + " (" + "PP: " + str(player.activePokemon.moves.move3.pp) +")")
-            print("4. " + player.activePokemon.moves.move4.name + " (" + "PP: " + str(player.activePokemon.moves.move4.pp) +")")
+            if player.activePokemon.moves.move1:     
+                print("1. " + player.activePokemon.moves.move1.name + " (" + "PP: " + str(player.activePokemon.moves.move1.pp) +")")
+            else: 
+                m1 = False
+                print("1. None")
+            if player.activePokemon.moves.move2: 
+                print("2. " + player.activePokemon.moves.move2.name + " (" + "PP: " + str(player.activePokemon.moves.move2.pp) +")")
+            else: 
+                m2 = False
+                print("2. None")
+            if player.activePokemon.moves.move3: 
+                print("3. "+ player.activePokemon.moves.move3.name + " (" + "PP: " + str(player.activePokemon.moves.move3.pp) +")")
+            else: 
+                m3 = False
+                print("3. None")
+            if player.activePokemon.moves.move4: 
+                print("4. " + player.activePokemon.moves.move4.name + " (" + "PP: " + str(player.activePokemon.moves.move4.pp) +")")
+            else:
+                m4 = False 
+                print("4. None")
             print("5. Go Back")
             userInput = int(input("What will you do? "))
             # ATTACK DETERMINATION!
             if userInput not in [1, 2, 3, 4]:
+                continue
+            elif (userInput is 1 and not m1) or (userInput is 2 and not m2) or (userInput is 3 and not m3) or (userInput is 4 and not m4):
+                print("You cannot select a move that is None.")
                 continue
             else:
                 if orderDeterminer(player.activePokemon, enemy.activePokemon):

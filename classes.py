@@ -248,6 +248,16 @@ class Move:
             return 1
     
     def damageFunc(self, attacker, defender, player):
+        det = self.accuracy / 100
+        det2 = random.random()
+        if det2 > det:
+            if player:
+                print(attacker.name + " used " + self.name + "!")
+                print(attacker.name + " missed!")
+            else:
+                print("The enemy " + attacker.name + " used " + self.name + "!")
+                print("The enemy " + attacker.name + " missed!")
+            return
         targets = 1
         weather = self.determineWeatherMoveDamage()
         critical = self.determineCrit(attacker, defender)
@@ -258,6 +268,18 @@ class Move:
         # TODO: other is an item effect
         other = 1
 
+        if player:
+            print(attacker.name + " used " + self.name + "!")
+        else:
+            print("The enemy " + attacker.name + " used " + self.name + "!")
+        if effectiveness is 0:
+            print("It does not affect " + defender.name + "...")
+        elif effectiveness is 1:
+            print("It had normal effectiveness.")
+        elif effectiveness > 1:
+            print("It's super effective!")
+        elif effectiveness < 1:
+            print("It's not very effective...")
 
         modifier = targets * weather * critical * rando * STAB * effectiveness * burn * other
         if self.damageType == "physical":
@@ -272,20 +294,6 @@ class Move:
                 defender.hp = 0
                 defender.fainted = True
         
-        if player:
-            print(attacker.name + " used " + self.name + "!")
-        else:
-            print("The enemy " + attacker.name + " used " + self.name + "!")
-        if effectiveness is 0:
-            print("It does not affect " + defender.name + "...")
-        elif effectiveness is 1:
-            print("It had normal effectiveness.")
-        elif effectiveness > 1:
-            print("It's super effective!")
-        elif effectiveness < 1:
-            print("It's not very effective...")
-            
-
     def use(self, attacker, defender, player):
             if self.pp <= 0:
                 print("You don't have enough PP to use that move!")

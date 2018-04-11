@@ -27,6 +27,7 @@ def setTypes(type, effectiveTypes, notEffectiveTypes, immuneTypes):
     type.setImmuneTypes(immuneTypes)
 
 # Setting type effectiveness
+types = [normal, fighting, flying, poison, ground, rock, bug, ghost, steel, fire, water, grass, electric, psychic, dragon, dark, fairy]
 setTypes(fighting, [normal, rock, steel, ice, dark], [flying, poison, bug, psychic, fairy], [ghost])
 setTypes(flying, [fighting, bug, grass], [rock, steel, electric], [None])
 setTypes(poison, [grass, fairy], [poison, ground, rock, ghost], [steel])
@@ -46,4 +47,3 @@ setTypes(dark, [ghost, psychic], [fighting, dark, fairy], [None])
 setTypes(fairy, [fighting, dragon, dark], [poison, steel, fire], [None])
 
 # list of all types 
-types = [normal, fighting, flying, poison, ground, rock, bug, ghost, steel, fire, water, grass, electric, psychic, dragon, dark, fairy]
