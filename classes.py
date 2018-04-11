@@ -1,6 +1,10 @@
 import random
 import abc
 import math
+import time
+import os
+
+clear = lambda: os.system('cls')
 
 class Player: 
     def __init__(self, pokemon, backpack): 
@@ -38,7 +42,10 @@ class FullRestore(Item):
     def use(self, user):
         user.hp = user.maxHp
         print("You used the full restore.")
-        print("Restored HP to " + str(user.hp) + ".")
+        time.sleep(2)
+        print("Restored " + user.name + "'s HP to " + str(user.hp) + ".")
+        time.sleep(2)
+        clear()
 
 class Pokemon:
     def __init__(self, name, hpStat, attackStat, defenseStat, spAttackStat, spDefenseStat, speedStat, level, moves, type1, type2, hpIV, 
@@ -248,15 +255,22 @@ class Move:
             return 1
     
     def damageFunc(self, attacker, defender, player):
+        delay = 2
         det = self.accuracy / 100
         det2 = random.random()
         if det2 > det:
             if player:
                 print(attacker.name + " used " + self.name + "!")
+                time.sleep(delay)
                 print(attacker.name + " missed!")
+                time.sleep(delay)
+                clear()
             else:
                 print("The enemy " + attacker.name + " used " + self.name + "!")
+                time.sleep(delay)
                 print("The enemy " + attacker.name + " missed!")
+                time.sleep(delay)
+                clear()
             return
         targets = 1
         weather = self.determineWeatherMoveDamage()
@@ -270,16 +284,24 @@ class Move:
 
         if player:
             print(attacker.name + " used " + self.name + "!")
+            time.sleep(delay)
         else:
             print("The enemy " + attacker.name + " used " + self.name + "!")
+            time.sleep(delay)
         if effectiveness is 0:
             print("It does not affect " + defender.name + "...")
+            time.sleep(delay)
         elif effectiveness is 1:
             print("It had normal effectiveness.")
+            time.sleep(delay)
         elif effectiveness > 1:
             print("It's super effective!")
+            time.sleep(delay)
         elif effectiveness < 1:
             print("It's not very effective...")
+            time.sleep(delay)
+
+        clear()
 
         modifier = targets * weather * critical * rando * STAB * effectiveness * burn * other
         if self.damageType == "physical":
@@ -297,6 +319,8 @@ class Move:
     def use(self, attacker, defender, player):
             if self.pp <= 0:
                 print("You don't have enough PP to use that move!")
+                time.sleep(2)
+                clear()
             else:
                 self.pp -= 1
                 return self.damageFunc(attacker, defender, player)
