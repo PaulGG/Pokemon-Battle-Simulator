@@ -8,21 +8,69 @@ import time
 clear = lambda: os.system('cls')
 
 def main():
+    clear()
     print("Welcome to Pokemon!")
-    print("Starting battle...")
     time.sleep(2)
     clear()
-    playGame()
-    while True:
-        usrIn = None
-        try:
-            usrIn = input("Would you like to play again? (yes/no) ")
-            if usrIn.lower() == 'yes':
-                playGame()
-            else:
-                print("Goodbye!")
+    closing = False
+    while not closing:
+        print("1. Battle")
+        print("2. Buy Items")
+        print("3. Create new Pokemon")
+        print("4. Create your Pokemon Team")
+        print("5. Close program.")
+        # MAYBE. print("4. Create new Pokemon Type.")
+        userInput = None
+        while True:
+            try:
+                userInput = int(input("Please select one of the following options. "))
                 break
-        except: TypeError
+            except ValueError:
+                print("Invalid input!")
+        clear()
+        if userInput is 1:
+            print("Starting battle...")
+            time.sleep(2)
+            clear()
+            playGame()
+            while True:
+                usrIn = None
+                try:
+                    usrIn = input("Would you like to play again? (yes/no) ")
+                    if usrIn.lower() == 'yes':
+                        clear()
+                        print("Starting battle...")
+                        time.sleep(2)
+                        playGame()
+                    else:
+                        clear()
+                        print("Returning to main menu...")
+                        time.sleep(2)
+                        clear()
+                        break
+                except: TypeError
+        elif userInput is 2:
+            #TODO: store
+            continue
+        elif userInput is 3:
+            #TODO: create new pokemon and add to a pokemon database, file IO
+            # let user reset pokemon to default options as well if they screw something up
+            continue
+        elif userInput is 4:
+            #TODO: let user pick their pokemon team!
+            continue
+        elif userInput is 5:
+            print("Goodbye!")
+            time.sleep(2)
+            closing = True
+        else:
+            print("That is an invalid option!")
+            time.sleep(2)
+            clear()
+            continue
+             
+        
+    
 
 # Adding two pokemon to test everything.
 
@@ -116,6 +164,7 @@ def determineDead(playerPokemon, enemyPokemon):
                     break
         # TODO: BETTER ENDGAME
         if enemy.activePokemon.fainted:
+            clear()
             print("The enemy has no more pokemon! You win!")
             global won
             won = True
@@ -220,7 +269,12 @@ def playGame():
                 m4 = False 
                 print("4. None")
             print("5. Go Back")
-            userInput = int(input("What will you do? "))
+            while True:
+                try:
+                    userInput = int(input("What will you do? "))
+                    break
+                except ValueError:
+                    print("Invalid input!")
             # ATTACK DETERMINATION!
             if userInput not in [1, 2, 3, 4]:
                 clear()
@@ -288,6 +342,7 @@ def playGame():
                             breakout = True
                             continue
                         select = player.pokemon[userInput2 - 1]
+                        clear()
                         if select.fainted is False:
                             player.backpack.useItem(userInput - 1, select)
                             break
