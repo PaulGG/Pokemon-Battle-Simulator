@@ -69,9 +69,6 @@ def main():
             clear()
             continue
              
-        
-    
-
 # Adding two pokemon to test everything.
 
 earthquake = Move("Earthquake", 100, 100, "physical", ground, 10)
@@ -153,6 +150,7 @@ def checkForAlivePokemon(player):
                 return True
     return False
 
+# TODO: refactor
 def determineDead(playerPokemon, enemyPokemon):
     if enemyPokemon.fainted:
         print("The enemy's " + enemy.activePokemon.name + " fainted!")
@@ -217,6 +215,7 @@ def determineDead(playerPokemon, enemyPokemon):
                 time.sleep(2)
                 clear()
 
+#TODO: refactor
 def playGame():
     global won
     won = False
