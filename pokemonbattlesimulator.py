@@ -27,6 +27,8 @@ def main():
                 break
             except ValueError:
                 print("Invalid input!")
+                time.sleep(2)
+                clear()
         clear()
         if userInput is 1:
             print("Starting battle...")
@@ -143,15 +145,28 @@ def enemyAttack(playerPokemon, enemyPokemon):
 
 won = False
 
-def checkForAlivePokemon(player):
+def checkForAlivePokemon(playe):
     for p in player.pokemon:
         if p:
             if p.fainted is False:
                 return True
     return False
 
+def getActivePokemon(playerPokemon, goBack):
+    activePokemons = []
+    i = 1
+    for pokemon in playerPokemon:
+        if pokemon:
+            activePokemons.append(pokemon)
+            print(str(i) + ". " + pokemon.name)
+            i += 1
+    if goBack:
+        print(str(i) + ". Go Back ")
+    return activePokemons
+
 # TODO: refactor
 def determineDead(playerPokemon, enemyPokemon):
+    # Determine if enemy pokemon is dead and out of pokemon.
     if enemyPokemon.fainted:
         print("The enemy's " + enemy.activePokemon.name + " fainted!")
         time.sleep(2)
@@ -172,6 +187,7 @@ def determineDead(playerPokemon, enemyPokemon):
             clear()
         return True
 
+    # Determine if player pokemon is dead and out of pokemon.
     if player.activePokemon.fainted:
         print(player.activePokemon.name + " fainted!")
         time.sleep(2)
@@ -181,15 +197,9 @@ def determineDead(playerPokemon, enemyPokemon):
                 print("You have no more pokemon! You lose. :(")
                 won = True
                 break
-            i = 1
-            activePokemons = []
-            for pokemon in player.pokemon:
-                if pokemon:
-                    activePokemons.append(pokemon)
-                    print(str(i) + ". " + pokemon.name)
-                    i += 1
             userInput = None
             while True:
+                activePokemons = getActivePokemon(player.pokemon, False)
                 try:
                     userInput = int(input("Please select a Pokemon. "))
                     if userInput > len(activePokemons): 
@@ -240,6 +250,8 @@ def playGame():
                 break
             except ValueError:
                 print("Invalid input!")
+                time.sleep(2)
+                clear()
 
         m1 = True
         m2 = True
@@ -247,153 +259,161 @@ def playGame():
         m4 = True
 
         if userInput is 1:
-            if player.activePokemon.moves.move1:     
-                print("1. " + player.activePokemon.moves.move1.name + " (" + "PP: " + str(player.activePokemon.moves.move1.pp) +")")
-            else: 
-                m1 = False
-                print("1. None")
-            if player.activePokemon.moves.move2: 
-                print("2. " + player.activePokemon.moves.move2.name + " (" + "PP: " + str(player.activePokemon.moves.move2.pp) +")")
-            else: 
-                m2 = False
-                print("2. None")
-            if player.activePokemon.moves.move3: 
-                print("3. "+ player.activePokemon.moves.move3.name + " (" + "PP: " + str(player.activePokemon.moves.move3.pp) +")")
-            else: 
-                m3 = False
-                print("3. None")
-            if player.activePokemon.moves.move4: 
-                print("4. " + player.activePokemon.moves.move4.name + " (" + "PP: " + str(player.activePokemon.moves.move4.pp) +")")
-            else:
-                m4 = False 
-                print("4. None")
-            print("5. Go Back")
             while True:
                 try:
+                    if player.activePokemon.moves.move1:     
+                        print("1. " + player.activePokemon.moves.move1.name + " (" + "PP: " + str(player.activePokemon.moves.move1.pp) +")")
+                    else: 
+                        m1 = False
+                        print("1. None")
+                    if player.activePokemon.moves.move2: 
+                        print("2. " + player.activePokemon.moves.move2.name + " (" + "PP: " + str(player.activePokemon.moves.move2.pp) +")")
+                    else: 
+                        m2 = False
+                        print("2. None")
+                    if player.activePokemon.moves.move3: 
+                        print("3. "+ player.activePokemon.moves.move3.name + " (" + "PP: " + str(player.activePokemon.moves.move3.pp) +")")
+                    else: 
+                        m3 = False
+                        print("3. None")
+                    if player.activePokemon.moves.move4: 
+                        print("4. " + player.activePokemon.moves.move4.name + " (" + "PP: " + str(player.activePokemon.moves.move4.pp) +")")
+                    else:
+                        m4 = False 
+                        print("4. None")
+                    print("5. Go Back")
                     userInput = int(input("What will you do? "))
-                    break
+                    if userInput not in [1, 2, 3, 4, 5]:
+                        clear()
+                        print("That option does not exist!")
+                        time.sleep(2)
+                        clear()
+                        continue
+                    elif userInput is 5:
+                        clear()
+                        break
+                    elif (userInput is 1 and not m1) or (userInput is 2 and not m2) or (userInput is 3 and not m3) or (userInput is 4 and not m4):
+                        print("You cannot select a move that is None.")
+                        time.sleep(3)
+                        clear()
+                        continue
+                    else:
+                        clear()
+                        if orderDeterminer(player.activePokemon, enemy.activePokemon):
+                            playerAttack(userInput, player.activePokemon, enemy.activePokemon)
+                            # is enemy pokemon dead?
+                            if determineDead(player.activePokemon, enemy.activePokemon):
+                                if won: break
+
+                            else:
+                                enemyAttack(player.activePokemon, enemy.activePokemon)
+                                determineDead(player.activePokemon, enemy.activePokemon)
+                            break
+                        else:
+                            enemyAttack(player.activePokemon, enemy.activePokemon)
+                            if determineDead(player.activePokemon, enemy.activePokemon):
+                                if won: break
+                            else:
+                                playerAttack(userInput, player.activePokemon, enemy.activePokemon)
+                                determineDead(player.activePokemon, enemy.activePokemon)
+                        break
                 except ValueError:
                     print("Invalid input!")
+                    time.sleep(2)
+                    clear()
             # ATTACK DETERMINATION!
-            if userInput not in [1, 2, 3, 4]:
-                clear()
-                continue
-            elif (userInput is 1 and not m1) or (userInput is 2 and not m2) or (userInput is 3 and not m3) or (userInput is 4 and not m4):
-                print("You cannot select a move that is None.")
-                time.sleep(3)
-                clear()
-                continue
-            else:
-                clear()
-                if orderDeterminer(player.activePokemon, enemy.activePokemon):
-                    playerAttack(userInput, player.activePokemon, enemy.activePokemon)
-                    # is enemy pokemon dead?
-                    if determineDead(player.activePokemon, enemy.activePokemon):
-                        if won: break
-                        continue
-
-                    else:
-                        enemyAttack(player.activePokemon, enemy.activePokemon)
-                        if determineDead(player.activePokemon, enemy.activePokemon):
-                            if won: break
-                else:
-                    enemyAttack(player.activePokemon, enemy.activePokemon)
-                    if determineDead(player.activePokemon, enemy.activePokemon):
-                        if won: break
-                    else:
-                        playerAttack(userInput, player.activePokemon, enemy.activePokemon)
-                        if determineDead(player.activePokemon, enemy.activePokemon):
-                            if won: break
+            
         elif userInput is 2:
-            if player.backpack:
-                items = player.backpack.getAllItems()
-                i = 1
-                for item in items:
-                    print(str(i) + ". " + item.name)
-                    i += 1
-                print(str(i) + ". Go Back" )
-                userInput = None
-                while True:
+                breakout = False
+                while not breakout:
                     try:
+                        items = player.backpack.getAllItems()
+                        i = 1
+                        for item in items:
+                            print(str(i) + ". " + item.name)
+                            i += 1
+                        print(str(i) + ". Go Back" )
                         userInput = int(input("What will you do? "))
-                        break
-                    except ValueError:
-                        print("Invalid input!")
-                if userInput > len(items) or userInput < 1:
-                    # go back
-                    clear()
-                    continue
-                else:
-                    clear()
-                    breakout = False
-                    while not breakout:
-                        j = 1
-                        activePokemons = []
-                        for pokemon in player.pokemon:
-                            if pokemon:
-                                activePokemons.append(pokemon)
-                                print(str(j) + ". " + pokemon.name)
-                                j += 1
-                        print(str(j) + ". Go Back")
-                        userInput2 = int(input("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". "))
-                        # TODO: "You can't pick a pokemon that doesnt exist!"
-                        if userInput2 > len(activePokemons):
+                        if userInput == len(items) + 1:
+                            clear()
                             breakout = True
                             continue
-                        select = player.pokemon[userInput2 - 1]
+                        if userInput > len(items) or userInput < 1:
+                        # go back
+                            clear()
+                            print("That selection does not exist!")
+                            time.sleep(2)
+                            clear()
+                            continue
+                        else:
+                            clear()
+                            breakout2 = False
+                            while not breakout2:
+                                activePokemons = getActivePokemon(player.pokemon, True)
+                                userInput2 = int(input("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". "))
+                                # TODO: "You can't pick a pokemon that doesnt exist!"
+                                if userInput2 > len(activePokemons):
+                                    breakout2 = True
+                                    continue
+                                select = player.pokemon[userInput2 - 1]
+                                clear()
+                                if select.fainted is False:
+                                    player.backpack.useItem(userInput - 1, select)
+                                    break
+                                else:
+                                    print("You cannot select a fainted pokemon!")
+                                    time.sleep(2)
+                                    clear()
+                            if not breakout2:
+                                enemyAttack(player.activePokemon, enemy.activePokemon)
+                                if determineDead(player.activePokemon, enemy.activePokemon):
+                                    if won: break
+                                breakout = True
+                            clear()
+                    except ValueError:
+                        print("Invalid input!")
+                        time.sleep(2)
                         clear()
-                        if select.fainted is False:
-                            player.backpack.useItem(userInput - 1, select)
-                            break
+                
+        elif userInput is 3:
+            breakout = False
+            while not breakout:
+                try:
+                    activePokemons = getActivePokemon(player.pokemon, True)
+                    userInput = int(input("Please select a Pokemon. "))
+                    if userInput == len(activePokemons) + 1:
+                        clear()
+                        break
+                    elif userInput > len(activePokemons) or userInput < 1:
+                        clear()
+                        print("That selection does not exist!")
+                        time.sleep(2)
+                        clear()
+                        continue
+                    else:
+                        clear()
+                        select = player.pokemon[userInput - 1]
+                        if select.fainted is False and select is not player.activePokemon:
+                            player.activePokemon = select
+                            print("Go! " + player.activePokemon.name + "!")
+                            time.sleep(2)
+                            clear()
+                            enemyAttack(player.activePokemon, enemy.activePokemon)
+                            breakout = True
+                        #TODO fix this garbage so that it tells the user to repick the pokemon. this requires functions which too lazy to do right now
+                        elif select is player.activePokemon:
+                            print("You cannot send out the pokemon that is currently in battle!")
+                            time.sleep(2)
+                            clear()
                         else:
                             print("You cannot select a fainted pokemon!")
                             time.sleep(2)
                             clear()
-                    if not breakout:
-                        enemyAttack(player.activePokemon, enemy.activePokemon)
-                        if determineDead(player.activePokemon, enemy.activePokemon):
-                            if won: break
-                    clear()
-
-        elif userInput is 3:
-            i = 1
-            activePokemons = []
-            for pokemon in player.pokemon:
-                if pokemon:
-                    activePokemons.append(pokemon)
-                    print(str(i) + ". " + pokemon.name)
-                    i += 1
-            print(str(i) + ". Go Back")
-            while True:
-                try:
-                    userInput = int(input("Please select a Pokemon. "))
-                    break
                 except ValueError:
                     print("Invalid Input!")
-            if userInput == i:
-                clear()
-                continue
-            elif userInput > len(activePokemons) or userInput < 1:
-                clear()
-                continue
-            else:
-                clear()
-                select = player.pokemon[userInput - 1]
-                if select.fainted is False and select is not player.activePokemon:
-                    player.activePokemon = select
-                    print("Go! " + player.activePokemon.name + "!")
                     time.sleep(2)
                     clear()
-                    enemyAttack(player.activePokemon, enemy.activePokemon)
-                #TODO fix this garbage so that it tells the user to repick the pokemon. this requires functions which too lazy to do right now
-                elif select is player.activePokemon:
-                    print("You cannot send out the pokemon that is currently in battle!")
-                    time.sleep(2)
-                    clear()
-                else:
-                    print("You cannot select a fainted pokemon!")
-                    time.sleep(2)
-                    clear()
+                
         else:
             print("That option does not exist!")
             time.sleep(2)
