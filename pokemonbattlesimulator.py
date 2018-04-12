@@ -27,11 +27,13 @@ def optionFour():
     clear()
 
 def optionFive():
+    
     print("Goodbye!")
     time.sleep(2)
 
-def unknownOption():
-    print("That is an invalid option!")
+def invalid():
+    clear()
+    print("That option does not exist!")
     time.sleep(2)
     clear()
 
@@ -46,7 +48,7 @@ def main_menu_chooser(args, closing):
         optionFive()
         return True
     else:
-        switcher.get(args, unknownOption)()
+        switcher.get(args, invalid)()
         return False
 
 def startBattle():
@@ -71,27 +73,27 @@ def battleAgain():
                 break
         except: TypeError
 
+def getInput(options, message):
+    while True:
+        for o in options:
+            print(o)
+        try:
+            return int(input(message))
+        except ValueError:
+            clear()
+            print("Invalid input!")
+            time.sleep(2)
+            clear()
+
 def main():
     clear()
     print("Welcome to Pokemon!")
     time.sleep(2)
     clear()
     closing = False
+    options = ["1. Battle", "2. Buy Items", "3. Create new Pokemon", "4. Create your Pokemon Team", "5. Close program."]
     while not closing:
-        print("1. Battle")
-        print("2. Buy Items")
-        print("3. Create new Pokemon")
-        print("4. Create your Pokemon Team")
-        print("5. Close program.")
-        # MAYBE. print("4. Create new Pokemon Type.")
-        while True:
-            try:
-                userInput = int(input("Please select one of the following options. "))
-                break
-            except ValueError:
-                print("Invalid input!")
-                time.sleep(2)
-                clear()
+        userInput = getInput(options, "Please select one of the following options. ")
         clear()
         closing = main_menu_chooser(userInput, closing)
              
@@ -171,7 +173,7 @@ def enemyAttack(playerPokemon, enemyPokemon):
 
 won = False
 
-def checkForAlivePokemon(playe):
+def checkForAlivePokemon(player):
     for p in player.pokemon:
         if p:
             if p.fainted is False:
@@ -201,7 +203,6 @@ def determineDead(playerPokemon, enemyPokemon):
                 if p.fainted is False:
                     enemy.activePokemon = p
                     break
-        # TODO: BETTER ENDGAME
         if enemy.activePokemon.fainted:
             clear()
             print("The enemy has no more pokemon! You win!")
@@ -229,9 +230,7 @@ def determineDead(playerPokemon, enemyPokemon):
                 try:
                     userInput = int(input("Please select a Pokemon. "))
                     if userInput > len(activePokemons): 
-                        print("That selection does not exist!")
-                        time.sleep(2)
-                        clear()
+                        invalid()
                     else: break
                 except ValueError:
                     print("Invalid Input!")
@@ -264,27 +263,18 @@ def playGame():
     # GAME LOOP
     while not won:
         # player chooses option
-        print("Pokemon Status: " + player.activePokemon.name + " HP: " + str(player.activePokemon.hp) + " | Level: " + str(player.activePokemon.level))
-        print("Enemy Pokemon Status: " + enemy.activePokemon.name + " HP: " + str(enemy.activePokemon.hp)+ " | Level: " + str(enemy.activePokemon.level))
-        print("1. Fight")
-        print("2. Bag")
-        print("3. Pokemon")
-        while True:
-            try:
-                userInput = int(input("What will you do? "))
-                clear()
-                break
-            except ValueError:
-                print("Invalid input!")
-                time.sleep(2)
-                clear()
+        pStatus = "Pokemon Status: " + player.activePokemon.name + " HP: " + str(player.activePokemon.hp) + " | Level: " + str(player.activePokemon.level)
+        eStatus = "Enemy Pokemon Status: " + enemy.activePokemon.name + " HP: " + str(enemy.activePokemon.hp)+ " | Level: " + str(enemy.activePokemon.level)
+        options = [pStatus, eStatus, "1. Fight", "2. Bag", "3. Pokemon"]
+        userInput = getInput(options, "What will you do? ")
+        clear()
 
-        m1 = True
-        m2 = True
-        m3 = True
-        m4 = True
-
+        # refactor if possible
         def battleOption1():
+            m1 = True
+            m2 = True
+            m3 = True
+            m4 = True
             while True:
                 try:
                     if player.activePokemon.moves.move1:     
@@ -310,10 +300,7 @@ def playGame():
                     print("5. Go Back")
                     userInput = int(input("What will you do? "))
                     if userInput not in [1, 2, 3, 4, 5]:
-                        clear()
-                        print("That option does not exist!")
-                        time.sleep(2)
-                        clear()
+                        invalid()
                         continue
                     elif userInput is 5:
                         clear()
@@ -348,6 +335,7 @@ def playGame():
                     time.sleep(2)
                     clear()
 
+        # TODO: refactor if possible
         def battleOption2():
             breakout = False
             while not breakout:
@@ -365,10 +353,7 @@ def playGame():
                         continue
                     if userInput > len(items) or userInput < 1:
                     # go back
-                        clear()
-                        print("That selection does not exist!")
-                        time.sleep(2)
-                        clear()
+                        invalid()
                         continue
                     else:
                         clear()
@@ -400,6 +385,7 @@ def playGame():
                     time.sleep(2)
                     clear()
 
+        # TODO: refactor if possible
         def battleOption3():
             breakout = False
             while not breakout:
@@ -410,10 +396,7 @@ def playGame():
                         clear()
                         break
                     elif userInput > len(activePokemons) or userInput < 1:
-                        clear()
-                        print("That selection does not exist!")
-                        time.sleep(2)
-                        clear()
+                        invalid()
                         continue
                     else:
                         clear()
@@ -438,12 +421,6 @@ def playGame():
                     time.sleep(2)
                     clear()
 
-        def invalid():
-            print("That option does not exist!")
-            time.sleep(2)
-            clear()
-
-
         def battlePicker(args):
             switcher = {
                 1: battleOption1,
@@ -465,6 +442,5 @@ def resetPlayerPokemon(human):
             p.spDefense = p.defaultSpDefense
             p.speed = p.defaultSpeed
             p.fainted = False
-
 
 main()
