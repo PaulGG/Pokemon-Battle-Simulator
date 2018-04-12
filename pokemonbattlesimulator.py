@@ -400,7 +400,6 @@ def playGame():
                             clear()
                             enemyAttack(player.activePokemon, enemy.activePokemon)
                             breakout = True
-                        #TODO fix this garbage so that it tells the user to repick the pokemon. this requires functions which too lazy to do right now
                         elif select is player.activePokemon:
                             print("You cannot send out the pokemon that is currently in battle!")
                             time.sleep(2)
