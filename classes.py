@@ -288,6 +288,9 @@ class Move:
         else:
             print("The enemy " + attacker.name + " used " + self.name + "!")
             time.sleep(delay)
+        if critical is not 1:
+            print("A critical hit!")
+            time.sleep(delay)
         if effectiveness is 0:
             print("It does not affect " + defender.name + "...")
             time.sleep(delay)

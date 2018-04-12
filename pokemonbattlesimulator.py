@@ -7,6 +7,70 @@ import time
 
 clear = lambda: os.system('cls')
 
+def optionOne():
+    startBattle()
+    battleAgain()
+
+def optionTwo():
+    print("TODO")
+    time.sleep(2)
+    clear()
+
+def optionThree():
+    print("TODO")
+    time.sleep(2)
+    clear()
+
+def optionFour():
+    print("TODO")
+    time.sleep(2)
+    clear()
+
+def optionFive():
+    print("Goodbye!")
+    time.sleep(2)
+
+def unknownOption():
+    print("That is an invalid option!")
+    time.sleep(2)
+    clear()
+
+def main_menu_chooser(args, closing):
+    switcher = {
+        1: optionOne,
+        2: optionTwo,
+        3: optionThree,
+        4: optionFour,
+    }
+    if args is 5:
+        optionFive()
+        return True
+    else:
+        switcher.get(args, unknownOption)()
+        return False
+
+def startBattle():
+    clear()
+    print("Starting battle...")
+    time.sleep(2)
+    clear()
+    playGame()
+
+def battleAgain():
+    while True:
+        usrIn = None
+        try:
+            usrIn = input("Would you like to play again? (yes/no) ")
+            if usrIn.lower() == 'yes':
+                startBattle()
+            else:
+                clear()
+                print("Returning to main menu...")
+                time.sleep(2)
+                clear()
+                break
+        except: TypeError
+
 def main():
     clear()
     print("Welcome to Pokemon!")
@@ -20,7 +84,6 @@ def main():
         print("4. Create your Pokemon Team")
         print("5. Close program.")
         # MAYBE. print("4. Create new Pokemon Type.")
-        userInput = None
         while True:
             try:
                 userInput = int(input("Please select one of the following options. "))
@@ -30,46 +93,7 @@ def main():
                 time.sleep(2)
                 clear()
         clear()
-        if userInput is 1:
-            print("Starting battle...")
-            time.sleep(2)
-            clear()
-            playGame()
-            while True:
-                usrIn = None
-                try:
-                    usrIn = input("Would you like to play again? (yes/no) ")
-                    if usrIn.lower() == 'yes':
-                        clear()
-                        print("Starting battle...")
-                        time.sleep(2)
-                        playGame()
-                    else:
-                        clear()
-                        print("Returning to main menu...")
-                        time.sleep(2)
-                        clear()
-                        break
-                except: TypeError
-        elif userInput is 2:
-            #TODO: store
-            continue
-        elif userInput is 3:
-            #TODO: create new pokemon and add to a pokemon database, file IO
-            # let user reset pokemon to default options as well if they screw something up
-            continue
-        elif userInput is 4:
-            #TODO: let user pick their pokemon team!
-            continue
-        elif userInput is 5:
-            print("Goodbye!")
-            time.sleep(2)
-            closing = True
-        else:
-            print("That is an invalid option!")
-            time.sleep(2)
-            clear()
-            continue
+        closing = main_menu_chooser(userInput, closing)
              
 # Adding two pokemon to test everything.
 
@@ -80,7 +104,6 @@ Move("Dragon Pulse", 85, 100, "special", dragon, 10), Move("Rock Slide", 75, 90,
 venusaur = Pokemon("Venusaur", 80, 82, 83, 100, 100, 80, 50, MoveSet(Move("Solar Beam", 120, 100, "special", grass, 10), earthquake, Move("Hidden Power",
 60, 100, "special", grass, 15), Move("Energy Ball", 90, 100, "special", grass, 10)), grass, poison, 31, 31, 31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1,
 "medium_slow", "something", None, None)
-
 
 player = Player([copy.deepcopy(venusaur), copy.deepcopy(charizard), None, None, None, None], Backpack([FullRestore(), FullRestore(), FullRestore()]))
 enemy = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], None)
@@ -99,16 +122,19 @@ def orderDeterminer(playerPokemon, enemyPokemon):
         return False
 
 def playerAttack(moveIndex, playerPokemon, enemyPokemon):
-    if moveIndex is 1:
-        playerPokemon.moves.useMove1().use(playerPokemon, enemyPokemon, True)
-    elif moveIndex is 2:
-        playerPokemon.moves.useMove2().use(playerPokemon, enemyPokemon, True)
-    elif moveIndex is 3:
-        playerPokemon.moves.useMove3().use(playerPokemon, enemyPokemon, True)
-    else:
-        playerPokemon.moves.useMove4().use(playerPokemon, enemyPokemon, True)
+    
+    def chooser(args):
+        switcher = {
+            1: playerPokemon.moves.useMove1().use,
+            2: playerPokemon.moves.useMove2().use,
+            3: playerPokemon.moves.useMove3().use,
+            4: playerPokemon.moves.useMove4().use
+        }
+        return switcher.get(args)(playerPokemon, enemyPokemon, True)
 
+    chooser(moveIndex)
 
+# TODO: switch
 def enemyAttack(playerPokemon, enemyPokemon):
     noMove1 = enemyPokemon.moves.move1.pp <= 0
     noMove2 = enemyPokemon.moves.move2.pp <= 0
@@ -258,7 +284,7 @@ def playGame():
         m3 = True
         m4 = True
 
-        if userInput is 1:
+        def battleOption1():
             while True:
                 try:
                     if player.activePokemon.moves.move1:     
@@ -321,61 +347,60 @@ def playGame():
                     print("Invalid input!")
                     time.sleep(2)
                     clear()
-            # ATTACK DETERMINATION!
-            
-        elif userInput is 2:
-                breakout = False
-                while not breakout:
-                    try:
-                        items = player.backpack.getAllItems()
-                        i = 1
-                        for item in items:
-                            print(str(i) + ". " + item.name)
-                            i += 1
-                        print(str(i) + ". Go Back" )
-                        userInput = int(input("What will you do? "))
-                        if userInput == len(items) + 1:
-                            clear()
-                            breakout = True
-                            continue
-                        if userInput > len(items) or userInput < 1:
-                        # go back
-                            clear()
-                            print("That selection does not exist!")
-                            time.sleep(2)
-                            clear()
-                            continue
-                        else:
-                            clear()
-                            breakout2 = False
-                            while not breakout2:
-                                activePokemons = getActivePokemon(player.pokemon, True)
-                                userInput2 = int(input("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". "))
-                                # TODO: "You can't pick a pokemon that doesnt exist!"
-                                if userInput2 > len(activePokemons):
-                                    breakout2 = True
-                                    continue
-                                select = player.pokemon[userInput2 - 1]
-                                clear()
-                                if select.fainted is False:
-                                    player.backpack.useItem(userInput - 1, select)
-                                    break
-                                else:
-                                    print("You cannot select a fainted pokemon!")
-                                    time.sleep(2)
-                                    clear()
-                            if not breakout2:
-                                enemyAttack(player.activePokemon, enemy.activePokemon)
-                                if determineDead(player.activePokemon, enemy.activePokemon):
-                                    if won: break
-                                breakout = True
-                            clear()
-                    except ValueError:
-                        print("Invalid input!")
+
+        def battleOption2():
+            breakout = False
+            while not breakout:
+                try:
+                    items = player.backpack.getAllItems()
+                    i = 1
+                    for item in items:
+                        print(str(i) + ". " + item.name)
+                        i += 1
+                    print(str(i) + ". Go Back" )
+                    userInput = int(input("What will you do? "))
+                    if userInput == len(items) + 1:
+                        clear()
+                        breakout = True
+                        continue
+                    if userInput > len(items) or userInput < 1:
+                    # go back
+                        clear()
+                        print("That selection does not exist!")
                         time.sleep(2)
                         clear()
-                
-        elif userInput is 3:
+                        continue
+                    else:
+                        clear()
+                        breakout2 = False
+                        while not breakout2:
+                            activePokemons = getActivePokemon(player.pokemon, True)
+                            userInput2 = int(input("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". "))
+                            # TODO: "You can't pick a pokemon that doesnt exist!"
+                            if userInput2 > len(activePokemons):
+                                breakout2 = True
+                                continue
+                            select = player.pokemon[userInput2 - 1]
+                            clear()
+                            if select.fainted is False:
+                                player.backpack.useItem(userInput - 1, select)
+                                break
+                            else:
+                                print("You cannot select a fainted pokemon!")
+                                time.sleep(2)
+                                clear()
+                        if not breakout2:
+                            enemyAttack(player.activePokemon, enemy.activePokemon)
+                            if determineDead(player.activePokemon, enemy.activePokemon):
+                                if won: break
+                            breakout = True
+                        clear()
+                except ValueError:
+                    print("Invalid input!")
+                    time.sleep(2)
+                    clear()
+
+        def battleOption3():
             breakout = False
             while not breakout:
                 try:
@@ -412,12 +437,24 @@ def playGame():
                     print("Invalid Input!")
                     time.sleep(2)
                     clear()
-                
-        else:
+
+        def invalid():
             print("That option does not exist!")
             time.sleep(2)
             clear()
 
+
+        def battlePicker(args):
+            switcher = {
+                1: battleOption1,
+                2: battleOption2, 
+                3: battleOption3
+            }
+
+            return switcher.get(args, invalid)()
+
+        battlePicker(userInput)
+           
 def resetPlayerPokemon(human):
     for p in human.pokemon:
         if p:
