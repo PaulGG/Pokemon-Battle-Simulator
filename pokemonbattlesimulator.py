@@ -11,26 +11,20 @@ import pygame
 
 clear = lambda: os.system('cls')
 
+selectSound = lambda: winsound.PlaySound("select_sound.wav", winsound.SND_ASYNC | winsound.SND_FILENAME)
+
 def optionOne():
     startBattle()
     battleAgain()
-
-def getStatInput(message):
-    while True:
-        hpStat = getNumericalInput(None, message)
-        if hpStat >= 1 and hpStat <= 255:
-            return hpStat
-        else: 
-            print("A Pokemon's base stat must be between 1 and 255!")
-            time.sleep(2)
-            clear()
 
 #TODO: add boolean for confirm
 def getTextInput(message):
     while True:
         try:
             usrInput = input(message)
+            selectSound()
             confirm = input("Your input is " + usrInput + ". Are you sure? (type y to continue) ")
+            selectSound()
             if confirm == "y":
                 return usrInput
         except ValueError:
@@ -39,14 +33,18 @@ def getTextInput(message):
             time.sleep(2)
             clear()
 
-def getInputWithConstraints(message, min, max):
+def getInputWithConstraints(message, options=None, min=None, max=None):
     while True:
+        if options:
+            for o in options:
+                print(o)
         try:
             usrInput = int(input(message))
-            if usrInput >= min and usrInput <= max:
-                return usrInput
-            else:
-                raise ValueError
+            selectSound()
+            if min and max: 
+                if usrInput < min and usrInput > max:
+                    raise ValueError
+            return usrInput
         except ValueError:
             clear()
             print("Invalid input!")
@@ -59,6 +57,7 @@ def getMoveInput(num):
             while True:
                 try:
                     usrInput = input("Do you want this Pokemon to have another move? (y/n) ")
+                    selectSound()
                     if usrInput == "y":
                         break
                     elif usrInput == "n":
@@ -127,13 +126,11 @@ def typeInput(msg, prim):
         clear()
 
 def optionTwo():
-    winsound.PlaySound("select_sound.wav", winsound.SND_ASYNC | winsound.SND_FILENAME )
     print("TODO")
     time.sleep(2)
     clear()
 
 def optionThree():
-    winsound.PlaySound("select_sound.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
     clear()
     print("Create your own Pokemon here!")
     print("Pokemon made here will be saved to the file.")
@@ -187,26 +184,22 @@ def optionThree():
 
 
 def optionFour():
-    winsound.PlaySound("select_sound.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
     print("TODO")
     time.sleep(2)
     clear()
 
 def optionFive():
-    winsound.PlaySound("select_sound.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
     move = getMoveInput(1)
     movesDatabase.update({move.name.lower(): move})
     writeData("moves_data.pkl", movesDatabase)
     clear()
 
 def optionSix():
-    winsound.PlaySound("select_sound.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
     clear()
     print("Goodbye!")
     time.sleep(2)
 
 def invalid():
-    winsound.PlaySound("select_sound.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
     clear()
     print("That option does not exist!")
     time.sleep(2)
@@ -246,32 +239,41 @@ def battleAgain():
                 print("Returning to main menu...")
                 time.sleep(2)
                 clear()
+                pygame.mixer.music.stop()
+                pygame.mixer.music.load("main_theme.wav")
+                pygame.mixer.music.play()
                 break
         except: TypeError
 
-def getNumericalInput(options, message):
-    while True:
-        if options:
-            for o in options:
-                print(o)
-        try:
-            return int(input(message))
-        except ValueError:
-            clear()
-            print("Invalid input!")
-            time.sleep(2)
-            clear()
+#def getNumericalInput(options, message):
+ #   while True:
+  #      if options:
+   #         for o in options:
+    #            print(o)
+     #   try:
+      #      inpoot = int(input(message))
+       #     selectSound()
+        #    return inpoot
+        #except ValueError:
+         #   clear()
+          #  print("Invalid input!")
+           # time.sleep(2)
+            #clear()
 
 def main():
     clear()
     print("Welcome to Pokemon!")
-    winsound.PlaySound("main_theme.wav", winsound.SND_ASYNC | winsound.SND_FILENAME)
+    pygame.mixer.init()
+    pygame.mixer.music.load("main_theme.wav")
+    pygame.mixer.music.play()
+    
+    pygame.mixer.music.set_volume(1)
     time.sleep(2)
     clear()
     closing = False
     options = ["1. Battle", "2. Buy Items", "3. Create new Pokemon", "4. Create your Pokemon Team", "5. Create new Move", "6. Close program."]
     while not closing:
-        userInput = getNumericalInput(options, "Please select one of the following options. ")
+        userInput = getInputWithConstraints("Please select one of the following options. ", options)
         clear()
         closing = main_menu_chooser(userInput, closing)
              
@@ -374,13 +376,13 @@ def enemyAttack(playerPokemon, enemyPokemon):
 
         # ATTACK DETERMINATION!
     if rand >= 0 and rand < 0.25:
-        enemy.activePokemon.moves.useMove1().use(enemy.activePokemon, player.activePokemon, False)
+        enemy.activePokemon.moves.useMove1().use(enemy.activePokemon, player.activePokemon, False, False)
     elif rand >= 0.25 and rand < 0.5:
-        enemy.activePokemon.moves.useMove2().use(enemy.activePokemon, player.activePokemon, False)
+        enemy.activePokemon.moves.useMove2().use(enemy.activePokemon, player.activePokemon, False, False)
     elif rand >= 0.5 and rand < 0.75:
-        enemy.activePokemon.moves.useMove3().use(enemy.activePokemon, player.activePokemon, False)
+        enemy.activePokemon.moves.useMove3().use(enemy.activePokemon, player.activePokemon, False, False)
     elif rand >= 0.75 and rand <= 1:
-        enemy.activePokemon.moves.useMove4().use(enemy.activePokemon, player.activePokemon, False)
+        enemy.activePokemon.moves.useMove4().use(enemy.activePokemon, player.activePokemon, False, False)
     else:
         print("The enemy has no moves left!")
 
@@ -468,6 +470,9 @@ def determineDead(playerPokemon, enemyPokemon, wild):
 
 #TODO: refactor
 def playGame():
+    pygame.mixer.music.stop()
+    pygame.mixer.music.load("battle_music.wav")
+    pygame.mixer.music.play()
     global won
     won = False
     resetPlayerPokemon(player)
@@ -482,7 +487,7 @@ def playGame():
         pStatus = "Pokemon Status: " + player.activePokemon.name + " HP: " + str(player.activePokemon.hp) + " | Level: " + str(player.activePokemon.level)
         eStatus = "Enemy Pokemon Status: " + enemy.activePokemon.name + " HP: " + str(enemy.activePokemon.hp)+ " | Level: " + str(enemy.activePokemon.level)
         options = [pStatus, eStatus, "1. Fight", "2. Bag", "3. Pokemon"]
-        userInput = getNumericalInput(options, "What will you do? ")
+        userInput = getInputWithConstraints("What will you do? ", options)
         clear()
 
         # refactor if possible
@@ -491,34 +496,37 @@ def playGame():
             m2 = True
             m3 = True
             m4 = True
+            usrMoves = []
+            if player.activePokemon.moves.move1:     
+                usrMoves.append("1. " + player.activePokemon.moves.move1.name + " (" + "PP: " + str(player.activePokemon.moves.move1.pp) +")")
+            else: 
+                m1 = False
+                usrMoves.append("1. None")
+            if player.activePokemon.moves.move2: 
+                usrMoves.append("2. " + player.activePokemon.moves.move2.name + " (" + "PP: " + str(player.activePokemon.moves.move2.pp) +")")
+            else: 
+                m2 = False
+                usrMoves.append("2. None")
+            if player.activePokemon.moves.move3: 
+                usrMoves.append("3. "+ player.activePokemon.moves.move3.name + " (" + "PP: " + str(player.activePokemon.moves.move3.pp) +")")
+            else: 
+                m3 = False
+                usrMoves.append("3. None")
+            if player.activePokemon.moves.move4: 
+                usrMoves.append("4. " + player.activePokemon.moves.move4.name + " (" + "PP: " + str(player.activePokemon.moves.move4.pp) +")")
+            else:
+                m4 = False 
+                usrMoves.append("4. None")
+            usrMoves.append("5. Go Back")
             while True:
                 try:
-                    if player.activePokemon.moves.move1:     
-                        print("1. " + player.activePokemon.moves.move1.name + " (" + "PP: " + str(player.activePokemon.moves.move1.pp) +")")
-                    else: 
-                        m1 = False
-                        print("1. None")
-                    if player.activePokemon.moves.move2: 
-                        print("2. " + player.activePokemon.moves.move2.name + " (" + "PP: " + str(player.activePokemon.moves.move2.pp) +")")
-                    else: 
-                        m2 = False
-                        print("2. None")
-                    if player.activePokemon.moves.move3: 
-                        print("3. "+ player.activePokemon.moves.move3.name + " (" + "PP: " + str(player.activePokemon.moves.move3.pp) +")")
-                    else: 
-                        m3 = False
-                        print("3. None")
-                    if player.activePokemon.moves.move4: 
-                        print("4. " + player.activePokemon.moves.move4.name + " (" + "PP: " + str(player.activePokemon.moves.move4.pp) +")")
-                    else:
-                        m4 = False 
-                        print("4. None")
-                    print("5. Go Back")
-                    userInput = int(input("What will you do? "))
-                    if userInput not in [1, 2, 3, 4, 5]:
-                        invalid()
-                        continue
-                    elif userInput is 5:
+                    #userInput = int(input("What will you do? "))
+                    userInput = getInputWithConstraints("What will you do? ", usrMoves, 1, 5)
+                    #if userInput not in [1, 2, 3, 4, 5]:
+                     #   invalid()
+                      #  clear()
+                       # continue
+                    if userInput is 5:
                         clear()
                         break
                     elif (userInput is 1 and not m1) or (userInput is 2 and not m2) or (userInput is 3 and not m3) or (userInput is 4 and not m4):
@@ -563,6 +571,7 @@ def playGame():
                         i += 1
                     print(str(i) + ". Go Back" )
                     userInput = int(input("What will you do? "))
+                    selectSound()
                     if userInput == len(items) + 1:
                         clear()
                         breakout = True
@@ -577,6 +586,7 @@ def playGame():
                         while not breakout2:
                             activePokemons = getActivePokemon(player.pokemon, True)
                             userInput2 = int(input("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". "))
+                            selectSound()
                             # TODO: "You can't pick a pokemon that doesnt exist!"
                             if userInput2 > len(activePokemons):
                                 breakout2 = True
@@ -608,6 +618,7 @@ def playGame():
                 try:
                     activePokemons = getActivePokemon(player.pokemon, True)
                     userInput = int(input("Please select a Pokemon. "))
+                    selectSound()
                     if userInput == len(activePokemons) + 1:
                         clear()
                         break
