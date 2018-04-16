@@ -34,23 +34,59 @@ class Item:
     def use(self, user):
         """Please define what the item will do in this function."""
         return
-    
-class FullRestore(Item):
-    def __init__(self):
-        Item.__init__(self, "Full Restore")
+
+class HealingItem(Item):
+    # Max is a boolean that determines if the item is supposed to fully restore the user's HP or not.
+    def __init__(self, name, healthValue, max):
+        Item.__init__(self, name)
+        self.healthValue = healthValue
+        self.max = max
     
     def use(self, user):
-        user.hp = user.maxHp
-        print("You used the full restore.")
+        if max:
+            user.hp = user.maxHp
+        else:
+            user.hp += self.healthValue
+        print("You used the " + self.name + ".")
+        time.sleep(2)
+        print("Restored " + user.name + "'s HP to " + str(user.hp) + ".")
+        time.sleep(2)
+        clear()
+    
+class FullRestore(HealingItem):
+    def __init__(self):
+        HealingItem.__init__(self, "Full Restore", 9999, True)
+
+class Potion(HealingItem):
+    def __init__(self, name):
+        HealingItem.__init__(self, "Potion", 20, False)
+
+class SuperPotion(HealingItem):
+    def __init__(self):
+        HealingItem.__init__(self, "Super Potion", 60, False)
+
+class HyperPotion(HealingItem):
+    def __init__(self):
+        HealingItem.__init__(self, "Hyper Potion", 200, False)
+
+class MaxPotion(HealingItem):
+    def __init__(self):
+        HealingItem.__init__(self, "Max Potion", 9999, True)
+
+    def use(self, user):
+        user.hp += 60
+        print("You used the super potion.")
         time.sleep(2)
         print("Restored " + user.name + "'s HP to " + str(user.hp) + ".")
         time.sleep(2)
         clear()
 
+
+
 class Pokemon:
     def __init__(self, name, hpStat, attackStat, defenseStat, spAttackStat, spDefenseStat, speedStat, level, moves, type1, type2, hpIV, 
         attackIV, defenseIV, spAttackIV, spDefenseIV, speedIV, hpEV, attackEV, defenseEV, spAttackEV, spDefenseEV, speedEV, nature, 
-        growthRate, passive, healthStatus, itemHeld): 
+        growthRate, passive, healthStatus, itemHeld, wild): 
         self.name = name
         # all stats must be betweeen 1 and 255
         self.hpStat = hpStat
@@ -114,12 +150,13 @@ class Pokemon:
         self.defaultSpeed = self.speed
 
         self.fainted = True if self.hp <= 0 else False
+        self.wild = wild
 
     def levelSetter(self, requiredXP):
         if self.xp >= requiredXP:
-                leftoverXP = self.xp - requiredXP
-                self.level += 1
-                xp = 0 + leftoverXP
+            leftoverXP = self.xp - requiredXP
+            self.level += 1
+            self.xp = 0 + leftoverXP
 
     def erraticGrowth(self):
         if self.level >= 100:
@@ -252,7 +289,7 @@ class Move:
         else: 
             return 1
     
-    def damageFunc(self, attacker, defender, player):
+    def damageFunc(self, attacker, defender, player, wild):
         delay = 2
         det = self.accuracy / 100
         det2 = random.random()
@@ -263,12 +300,16 @@ class Move:
                 print(attacker.name + " missed!")
                 time.sleep(delay)
                 clear()
-            else:
+            elif not wild:
                 print("The enemy " + attacker.name + " used " + self.name + "!")
                 time.sleep(delay)
                 print("The enemy " + attacker.name + " missed!")
                 time.sleep(delay)
                 clear()
+            else:
+                print("The wild " + attacker.name + "used " + self.name + "!")
+                time.sleep(delay)
+                print("The wild " + attacker.name + " missed!")
             return
         targets = 1
         weather = self.determineWeatherMoveDamage()
@@ -283,8 +324,11 @@ class Move:
         if player:
             print(attacker.name + " used " + self.name + "!")
             time.sleep(delay)
-        else:
+        elif not wild:
             print("The enemy " + attacker.name + " used " + self.name + "!")
+            time.sleep(delay)
+        else:
+            print("The wild " + attacker.name + " used " + self.name + "!")
             time.sleep(delay)
         if critical is not 1:
             print("A critical hit!")
@@ -317,14 +361,14 @@ class Move:
                 defender.hp = 0
                 defender.fainted = True
         
-    def use(self, attacker, defender, player):
+    def use(self, attacker, defender, player, wild):
             if self.pp <= 0:
                 print("You don't have enough PP to use that move!")
                 time.sleep(2)
                 clear()
             else:
                 self.pp -= 1
-                return self.damageFunc(attacker, defender, player)
+                return self.damageFunc(attacker, defender, player, wild)
 
 
 class Environment:

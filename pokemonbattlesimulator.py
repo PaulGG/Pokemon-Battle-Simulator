@@ -5,6 +5,9 @@ from pokemontypes import flying, poison, ground, rock, fire, grass, dragon, type
 import os
 import time
 import pickle
+import winsound
+import sys
+import pygame
 
 clear = lambda: os.system('cls')
 
@@ -123,7 +126,14 @@ def typeInput(msg, prim):
         time.sleep(2)
         clear()
 
+def optionTwo():
+    winsound.PlaySound("select_sound.wav", winsound.SND_ASYNC | winsound.SND_FILENAME )
+    print("TODO")
+    time.sleep(2)
+    clear()
+
 def optionThree():
+    winsound.PlaySound("select_sound.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
     clear()
     print("Create your own Pokemon here!")
     print("Pokemon made here will be saved to the file.")
@@ -170,33 +180,33 @@ def optionThree():
     level = getInputWithConstraints("Please enter the level for the Pokemon. (1 to 100) ", 1, 100)
     newPokemon = Pokemon(name, hpStat, attackStat, defenseStat, spAttackStat, spDefenseStat, speedStat, level, moves, type1, type2, hpIV, 
         attackIV, defenseIV, spAttackIV, spDefenseIV, speedIV, hpEV, attackEV, defenseEV, spAttackEV, spDefenseEV, speedEV, nature, 
-        growthRate, passive, healthStatus, itemHeld)
+        growthRate, passive, healthStatus, itemHeld, False)
     pokemonDatabase.update({newPokemon.name.lower(): newPokemon})
     writeData("pokemon_data.pkl", pokemonDatabase)
     clear()
 
-def optionTwo():
-    print("TODO")
-    time.sleep(2)
-    clear()
 
 def optionFour():
+    winsound.PlaySound("select_sound.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
     print("TODO")
     time.sleep(2)
     clear()
 
 def optionFive():
+    winsound.PlaySound("select_sound.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
     move = getMoveInput(1)
     movesDatabase.update({move.name.lower(): move})
     writeData("moves_data.pkl", movesDatabase)
     clear()
 
 def optionSix():
+    winsound.PlaySound("select_sound.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
     clear()
     print("Goodbye!")
     time.sleep(2)
 
 def invalid():
+    winsound.PlaySound("select_sound.wav", winsound.SND_FILENAME | winsound.SND_ASYNC)
     clear()
     print("That option does not exist!")
     time.sleep(2)
@@ -255,6 +265,7 @@ def getNumericalInput(options, message):
 def main():
     clear()
     print("Welcome to Pokemon!")
+    winsound.PlaySound("main_theme.wav", winsound.SND_ASYNC | winsound.SND_FILENAME)
     time.sleep(2)
     clear()
     closing = False
@@ -278,9 +289,9 @@ energy_ball = Move("Energy Ball", 90, 100, "special", grass, 10)
 
 charizard = Pokemon("Charizard", 78, 84, 78, 109, 85, 100, 50, MoveSet(flamethrower, earthquake,
 dragon_pulse, rock_slide), fire, flying, 31, 31,
-31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1, "medium_slow", "something", None, None)
+31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1, "medium_slow", "something", None, None, False)
 venusaur = Pokemon("Venusaur", 80, 82, 83, 100, 100, 80, 50, MoveSet(solar_beam, earthquake, hidden_power, energy_ball), grass, poison, 31, 31, 31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1,
-"medium_slow", "something", None, None)
+"medium_slow", "something", None, None, False)
 
 player = Player([copy.deepcopy(venusaur), copy.deepcopy(charizard), None, None, None, None], Backpack([FullRestore(), FullRestore(), FullRestore()]))
 enemy = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], None)
@@ -334,7 +345,7 @@ def playerAttack(moveIndex, playerPokemon, enemyPokemon):
             3: playerPokemon.moves.useMove3().use,
             4: playerPokemon.moves.useMove4().use
         }
-        return switcher.get(args)(playerPokemon, enemyPokemon, True)
+        return switcher.get(args)(playerPokemon, enemyPokemon, True, playerPokemon.wild)
 
     chooser(moveIndex)
 
@@ -395,10 +406,13 @@ def getActivePokemon(playerPokemon, goBack):
     return activePokemons
 
 # TODO: refactor
-def determineDead(playerPokemon, enemyPokemon):
+def determineDead(playerPokemon, enemyPokemon, wild):
     # Determine if enemy pokemon is dead and out of pokemon.
     if enemyPokemon.fainted:
-        print("The enemy's " + enemy.activePokemon.name + " fainted!")
+        if not wild:
+            print("The enemy's " + enemy.activePokemon.name + " fainted!")
+        else: 
+            print("The wild " + enemyPokemon.name + " fainted!" )
         time.sleep(2)
         for p in enemy.pokemon:
             if p:
@@ -517,20 +531,20 @@ def playGame():
                         if orderDeterminer(player.activePokemon, enemy.activePokemon):
                             playerAttack(userInput, player.activePokemon, enemy.activePokemon)
                             # is enemy pokemon dead?
-                            if determineDead(player.activePokemon, enemy.activePokemon):
+                            if determineDead(player.activePokemon, enemy.activePokemon, enemy.activePokemon.wild):
                                 if won: break
 
                             else:
                                 enemyAttack(player.activePokemon, enemy.activePokemon)
-                                determineDead(player.activePokemon, enemy.activePokemon)
+                                determineDead(player.activePokemon, enemy.activePokemon, enemy.activePokemon.wild)
                             break
                         else:
                             enemyAttack(player.activePokemon, enemy.activePokemon)
-                            if determineDead(player.activePokemon, enemy.activePokemon):
+                            if determineDead(player.activePokemon, enemy.activePokemon, enemy.activePokemon.wild):
                                 if won: break
                             else:
                                 playerAttack(userInput, player.activePokemon, enemy.activePokemon)
-                                determineDead(player.activePokemon, enemy.activePokemon)
+                                determineDead(player.activePokemon, enemy.activePokemon, enemy.activePokemon.wild)
                         break
                 except ValueError:
                     print("Invalid input!")
@@ -578,7 +592,7 @@ def playGame():
                                 clear()
                         if not breakout2:
                             enemyAttack(player.activePokemon, enemy.activePokemon)
-                            if determineDead(player.activePokemon, enemy.activePokemon):
+                            if determineDead(player.activePokemon, enemy.activePokemon, enemy.activePokemon.wild):
                                 if won: break
                             breakout = True
                         clear()
