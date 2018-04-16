@@ -93,7 +93,7 @@ class Pokemon:
         self.passive = passive
 
         # health status is like burn, paralyzed, etc.
-        self.healthStatus = healthStatus
+        self.healthStatus = "healthStatus"
 
         # item held....has effects
         self.itemHeld = itemHeld
@@ -115,61 +115,59 @@ class Pokemon:
 
         self.fainted = True if self.hp <= 0 else False
 
-        def levelSetter(self, requiredXP):
-            if self.xp >= requiredXP:
-                    leftoverXP = self.xp - requiredXP
-                    self.level += 1
-                    xp = 0 + leftoverXP
+    def levelSetter(self, requiredXP):
+        if self.xp >= requiredXP:
+                leftoverXP = self.xp - requiredXP
+                self.level += 1
+                xp = 0 + leftoverXP
 
-        def erraticGrowth(self):
-            if self.level >= 100:
-                self.level = 100
-                return
-            if self.level < 50:
-                requiredXP = (((level + 1) ** 3 * (100 - level + 1)) / 50) - (((level) ** 3 * (100 - level)) / 50)
-                self.levelSetter(requiredXP)
-            elif level >= 50 and level < 68:
-                requiredXP = (((level + 1) ** 3 * (150 - level + 1)) / 100) - (((level) ** 3 * (150 - level)) / 100)
-                self.levelSetter(requiredXP)
-            elif level >= 68 and level < 98:
-                requiredXP = (((level + 1) ** 3 * math.floor((1911 - (10 * level + 1)) / 3)) / 500) - (((level) ** 3 
-                * math.floor((1911 - (10 * level)) / 3)) / 500)
-                self.levelSetter(requiredXP)
-            elif level >= 98 and level > 100:
-                requiredXP = (((level + 1) ** 3 * (160 - level + 1)) / 100) - (((level) ** 3 * (160 - level)) / 100)
-                self.levelSetter(requiredXP)
-        
-        def fastGrowth(self):
-            if self.level >= 100:
-                self.level = 100
-            else:
-                requiredXP = ((4 * (level + 1) ** 3) / 5) - ((4 * (level) ** 3) / 5)
-                self.levelSetter(requiredXP)
+    def erraticGrowth(self):
+        if self.level >= 100:
+            self.level = 100
+            return
+        if self.level < 50:
+            requiredXP = (((self.level + 1) ** 3 * (100 - self.level + 1)) / 50) - (((self.level) ** 3 * (100 - self.level)) / 50)
+            self.levelSetter(requiredXP)
+        elif self.level >= 50 and self.level < 68:
+            requiredXP = (((self.level + 1) ** 3 * (150 - self.level + 1)) / 100) - (((self.level) ** 3 * (150 - self.level)) / 100)
+            self.levelSetter(requiredXP)
+        elif self.level >= 68 and self.level < 98:
+            requiredXP = (((self.level + 1) ** 3 * math.floor((1911 - (10 * self.level + 1)) / 3)) / 500) - (((self.level) ** 3 
+            * math.floor((1911 - (10 * self.level)) / 3)) / 500)
+            self.levelSetter(requiredXP)
+        elif self.level >= 98 and self.level > 100:
+            requiredXP = (((self.level + 1) ** 3 * (160 - self.level + 1)) / 100) - (((self.level) ** 3 * (160 - self.level)) / 100)
+            self.levelSetter(requiredXP)
+    
+    def fastGrowth(self):
+        if self.level >= 100:
+            self.level = 100
+        else:
+            requiredXP = ((4 * (self.level + 1) ** 3) / 5) - ((4 * (self.level) ** 3) / 5)
+            self.levelSetter(requiredXP)
 
-        def mediumFastGrowth(self):
-            if self.level >= 100:
-                self.level = 100
-            else:
-                requiredXP = (level + 1) ** 3 - level ** 3
-                self.levelSetter(requiredXP)
-        
-        def mediumSlowGrowth(self):
-            if self.level >= 100:
-                self.level = 100
-            else:
-                requiredXP = (((6 / 5) * (level + 1) ** 3) - (15 * (level + 1) ** 2) + 100 * (level + 1) - 140) -\
-                (((6 / 5) * (level) ** 3) - (15 * (level) ** 2) + 100 * (level) - 140)
-                self.levelSetter(requiredXP)
-        
-        def slowGrowth(self):
-            if self.level >= 100:
-                self.level = 100
-            else:
-                requiredXP = ((5 * (level + 1) ** 3) / 4) - ((5 * (level) ** 3) / 4) 
-                self.levelSetter(requiredXP)
-        
-            
- 
+    def mediumFastGrowth(self):
+        if self.level >= 100:
+            self.level = 100
+        else:
+            requiredXP = (self.level + 1) ** 3 - self.level ** 3
+            self.levelSetter(requiredXP)
+    
+    def mediumSlowGrowth(self):
+        if self.level >= 100:
+            self.level = 100
+        else:
+            requiredXP = (((6 / 5) * (self.level + 1) ** 3) - (15 * (self.level + 1) ** 2) + 100 * (self.level + 1) - 140) -\
+            (((6 / 5) * (self.level) ** 3) - (15 * (self.level) ** 2) + 100 * (self.level) - 140)
+            self.levelSetter(requiredXP)
+    
+    def slowGrowth(self):
+        if self.level >= 100:
+            self.level = 100
+        else:
+            requiredXP = ((5 * (self.level + 1) ** 3) / 4) - ((5 * (self.level) ** 3) / 4) 
+            self.levelSetter(requiredXP)
+    
 class Move: 
     def __init__(self, name, power, accuracy, damageType, type, pp):
         self.name = name

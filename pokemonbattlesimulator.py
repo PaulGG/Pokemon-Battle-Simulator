@@ -1,9 +1,10 @@
 import random
 import copy
 from classes import Environment, Move, Pokemon, Player, MoveSet, Backpack, FullRestore, environment
-from pokemontypes import flying, poison, ground, rock, fire, grass, dragon
+from pokemontypes import flying, poison, ground, rock, fire, grass, dragon, types, water
 import os
 import time
+import pickle
 
 clear = lambda: os.system('cls')
 
@@ -11,12 +12,170 @@ def optionOne():
     startBattle()
     battleAgain()
 
-def optionTwo():
-    print("TODO")
-    time.sleep(2)
-    clear()
+def getStatInput(message):
+    while True:
+        hpStat = getNumericalInput(None, message)
+        if hpStat >= 1 and hpStat <= 255:
+            return hpStat
+        else: 
+            print("A Pokemon's base stat must be between 1 and 255!")
+            time.sleep(2)
+            clear()
+
+#TODO: add boolean for confirm
+def getTextInput(message):
+    while True:
+        try:
+            usrInput = input(message)
+            confirm = input("Your input is " + usrInput + ". Are you sure? (type y to continue) ")
+            if confirm == "y":
+                return usrInput
+        except ValueError:
+            clear()
+            print("Invalid input!")
+            time.sleep(2)
+            clear()
+
+def getInputWithConstraints(message, min, max):
+    while True:
+        try:
+            usrInput = int(input(message))
+            if usrInput >= min and usrInput <= max:
+                return usrInput
+            else:
+                raise ValueError
+        except ValueError:
+            clear()
+            print("Invalid input!")
+            time.sleep(2)
+            clear()
+
+def getMoveInput(num):
+    if num is not 1 and num is not 2:
+        if num is 3 or 4:
+            while True:
+                try:
+                    usrInput = input("Do you want this Pokemon to have another move? (y/n) ")
+                    if usrInput == "y":
+                        break
+                    elif usrInput == "n":
+                        return
+                    else: 
+                        raise ValueError
+                except ValueError:
+                    clear()
+                    print("Invalid input!")
+                    time.sleep(2)
+                    clear()
+    name = getTextInput("Please enter the name of move " + str(num) + ". ")
+    move = movesDatabase.get(name.lower())
+    if move:
+        print("This move already exists in the database.")
+        time.sleep(2)
+        clear()
+        return move
+    while True:
+        pType = getTextInput("Please enter the Pokemon type of this move. ")
+        if types.get(pType):
+            break
+        print("That isn't a valid type.")
+        time.sleep(2)
+        clear()
+    dmgType = getTextInput("Please enter if this is a physical or special move damage type. ")
+    accuracy = getInputWithConstraints("Please enter an accuracy value (10 to 100) ", 10, 100)
+    damage = getInputWithConstraints("Please enter a damage value (50 to 150) ", 50, 150)
+    PP = getInputWithConstraints("Please enter the power point (PP) value (5 to 50) ", 5, 50)
+    return Move(name, damage, accuracy, dmgType, pType, PP)
+
+def getMovesInput():
+    move1 = getMoveInput(1)
+    movesDatabase.update({move1.name: move1})
+    move2 = getMoveInput(2)
+    movesDatabase.update({move2.name: move2})
+    move3 = getMoveInput(3)
+    if move3:
+        movesDatabase.update({move3.name: move3})
+        move4 = getMoveInput(4)
+        if move4:
+            movesDatabase.update({move4.name: move4})
+        else:
+            move4 = None
+    else:
+        move3 = None
+        move4 = None
+    writeData("moves_data.pkl", movesDatabase)
+    return MoveSet(move1, move2, move3, move4)
+    
+def typeInput(msg, prim):
+    while True:
+        usrIn = getTextInput(msg)
+        if usrIn.lower() == "none" and prim is not 1:
+            return None
+        elif usrIn.lower() == "none":
+            print("You must have a primary type. ")
+            time.sleep(2)
+            clear()
+            continue
+        usrType = types.get(usrIn.lower())
+        if usrType:
+            return usrType
+        print("Type not recognized.")
+        time.sleep(2)
+        clear()
 
 def optionThree():
+    clear()
+    print("Create your own Pokemon here!")
+    print("Pokemon made here will be saved to the file.")
+    print("It is advised that you take legitimate pokemon from the original game and put them in.")
+    print("Don't make ridiculously overpowered/underpowred Pokemon! Normally pokemon have base stats between 50-120.")
+    print("Enemies will be randomly assigned pokemon in the save game. If you make an overpowered pokemon, then the enemy might get it!")
+    time.sleep(2)
+    clear()
+    name = getTextInput("Please enter the name of the pokemon that you would like to create. ")
+    newPokemon = pokemonDatabase.get(name.lower())
+    if newPokemon:
+        print("This pokemon is already in the database.")
+        time.sleep(2)
+        clear()
+        return
+    hpStat = getInputWithConstraints("Please enter the HP stat. (between 1-255) ", 1, 255)
+    attackStat = getInputWithConstraints("Please enter the attack stat. (between 1-255) ", 1, 255)
+    defenseStat = getInputWithConstraints("Please enter the defense stat. (between 1-255) ", 1, 255)
+    spAttackStat = getInputWithConstraints("Please enter the special attack stat. (between 1-255) ", 1, 255)
+    spDefenseStat = getInputWithConstraints("Please enter the special defense stat. (between 1-255) ", 1, 255)
+    speedStat = getInputWithConstraints("Please enter the speed stat. (between 1-255) ", 1, 255)
+    moves = getMovesInput()
+    type1 = typeInput("Please enter the pokemon's primary type. ", 1)
+    type2 = typeInput("Please enter the pokemon's secondary type. If it does not have one, type 'none'. ", 2)
+    hpIV = round(random.random() * 31)
+    attackIV = round(random.random() * 31)
+    defenseIV = round(random.random() * 31)
+    spAttackIV = round(random.random() * 31)
+    spDefenseIV = round(random.random() * 31)
+    speedIV = round(random.random() * 31)
+    hpEV = round(random.random() * 252)
+    attackEV = round(random.random() * 252)
+    defenseEV = round(random.random() * 252)
+    spAttackEV = round(random.random() * 252)
+    spDefenseEV = round(random.random() * 252)
+    speedEV = round(random.random() * 252)
+    # worry about nature later
+    nature = 1.0
+    # worry about this later
+    growthRate = None#input("Please enter the pokemon's growth rate.")
+    passive = None#input("Please enter your pokemon's passive.")
+    healthStatus = None
+    itemHeld = None
+    level = getInputWithConstraints("Please enter the level for the Pokemon. (1 to 100) ", 1, 100)
+    newPokemon = Pokemon(name, hpStat, attackStat, defenseStat, spAttackStat, spDefenseStat, speedStat, level, moves, type1, type2, hpIV, 
+        attackIV, defenseIV, spAttackIV, spDefenseIV, speedIV, hpEV, attackEV, defenseEV, spAttackEV, spDefenseEV, speedEV, nature, 
+        growthRate, passive, healthStatus, itemHeld)
+    pokemonDatabase.update({newPokemon.name.lower(): newPokemon})
+    writeData("pokemon_data.pkl", pokemonDatabase)
+    clear()
+
+def optionTwo():
     print("TODO")
     time.sleep(2)
     clear()
@@ -27,7 +186,13 @@ def optionFour():
     clear()
 
 def optionFive():
-    
+    move = getMoveInput(1)
+    movesDatabase.update({move.name.lower(): move})
+    writeData("moves_data.pkl", movesDatabase)
+    clear()
+
+def optionSix():
+    clear()
     print("Goodbye!")
     time.sleep(2)
 
@@ -43,9 +208,10 @@ def main_menu_chooser(args, closing):
         2: optionTwo,
         3: optionThree,
         4: optionFour,
+        5: optionFive
     }
-    if args is 5:
-        optionFive()
+    if args is 6:
+        optionSix()
         return True
     else:
         switcher.get(args, invalid)()
@@ -73,10 +239,11 @@ def battleAgain():
                 break
         except: TypeError
 
-def getInput(options, message):
+def getNumericalInput(options, message):
     while True:
-        for o in options:
-            print(o)
+        if options:
+            for o in options:
+                print(o)
         try:
             return int(input(message))
         except ValueError:
@@ -91,24 +258,59 @@ def main():
     time.sleep(2)
     clear()
     closing = False
-    options = ["1. Battle", "2. Buy Items", "3. Create new Pokemon", "4. Create your Pokemon Team", "5. Close program."]
+    options = ["1. Battle", "2. Buy Items", "3. Create new Pokemon", "4. Create your Pokemon Team", "5. Create new Move", "6. Close program."]
     while not closing:
-        userInput = getInput(options, "Please select one of the following options. ")
+        userInput = getNumericalInput(options, "Please select one of the following options. ")
         clear()
         closing = main_menu_chooser(userInput, closing)
              
 # Adding two pokemon to test everything.
 
+
+# Some default moves.
 earthquake = Move("Earthquake", 100, 100, "physical", ground, 10)
-charizard = Pokemon("Charizard", 78, 84, 78, 109, 85, 100, 50, MoveSet(Move("Flamethrower", 90, 100, "special", fire, 15), earthquake,
-Move("Dragon Pulse", 85, 100, "special", dragon, 10), Move("Rock Slide", 75, 90, "physical", rock, 10)), fire, flying, 31, 31,
+flamethrower = Move("Flamethrower", 90, 100, "special", fire, 15)
+dragon_pulse = Move("Dragon Pulse", 85, 100, "special", dragon, 10)
+rock_slide = Move("Rock Slide", 75, 90, "physical", rock, 10)
+solar_beam = Move("Solar Beam", 120, 100, "special", grass, 10)
+hidden_power = Move("Hidden Power", 60, 100, "special", grass, 15)
+energy_ball = Move("Energy Ball", 90, 100, "special", grass, 10)
+
+charizard = Pokemon("Charizard", 78, 84, 78, 109, 85, 100, 50, MoveSet(flamethrower, earthquake,
+dragon_pulse, rock_slide), fire, flying, 31, 31,
 31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1, "medium_slow", "something", None, None)
-venusaur = Pokemon("Venusaur", 80, 82, 83, 100, 100, 80, 50, MoveSet(Move("Solar Beam", 120, 100, "special", grass, 10), earthquake, Move("Hidden Power",
-60, 100, "special", grass, 15), Move("Energy Ball", 90, 100, "special", grass, 10)), grass, poison, 31, 31, 31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1,
+venusaur = Pokemon("Venusaur", 80, 82, 83, 100, 100, 80, 50, MoveSet(solar_beam, earthquake, hidden_power, energy_ball), grass, poison, 31, 31, 31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1,
 "medium_slow", "something", None, None)
 
 player = Player([copy.deepcopy(venusaur), copy.deepcopy(charizard), None, None, None, None], Backpack([FullRestore(), FullRestore(), FullRestore()]))
 enemy = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], None)
+
+defaultMovesDatabase = {
+    earthquake.name.lower(): earthquake, flamethrower.name.lower(): flamethrower, dragon_pulse.name.lower(): dragon_pulse, rock_slide.name.lower(): rock_slide, solar_beam.name.lower(): 
+    solar_beam, hidden_power.name.lower(): hidden_power, energy_ball.name.lower(): energy_ball
+}
+
+defaultPokemonDatabase = {
+    charizard.name.lower(): charizard, venusaur.name.lower(): venusaur
+}
+
+def readData(filename, defaultData):
+    if not os.path.exists(filename):
+        open(filename, "w")
+
+    try:
+        with open(filename, "rb") as inpuut:
+            return pickle.load(inpuut)
+    except EOFError:
+        with open(filename, "wb") as output:
+            pickle.dump(defaultData, output, pickle.HIGHEST_PROTOCOL)
+
+def writeData(filename, data):
+    with open(filename, "wb") as output:
+        pickle.dump(data, output, pickle.HIGHEST_PROTOCOL)
+    
+movesDatabase = readData("moves_data.pkl", defaultMovesDatabase)
+pokemonDatabase = readData("pokemon_data.pkl", defaultPokemonDatabase)
 
 def orderDeterminer(playerPokemon, enemyPokemon):
     # Order is random if both pokemon's speed stats are identical.
@@ -266,7 +468,7 @@ def playGame():
         pStatus = "Pokemon Status: " + player.activePokemon.name + " HP: " + str(player.activePokemon.hp) + " | Level: " + str(player.activePokemon.level)
         eStatus = "Enemy Pokemon Status: " + enemy.activePokemon.name + " HP: " + str(enemy.activePokemon.hp)+ " | Level: " + str(enemy.activePokemon.level)
         options = [pStatus, eStatus, "1. Fight", "2. Bag", "3. Pokemon"]
-        userInput = getInput(options, "What will you do? ")
+        userInput = getNumericalInput(options, "What will you do? ")
         clear()
 
         # refactor if possible

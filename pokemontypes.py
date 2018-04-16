@@ -1,5 +1,4 @@
 from classes import Type
-
 # Declaration of all pokemon types
 normal = Type("normal") 
 fighting = Type("fighting")
@@ -27,7 +26,10 @@ def setTypes(type, effectiveTypes, notEffectiveTypes, immuneTypes):
     type.setImmuneTypes(immuneTypes)
 
 # Setting type effectiveness
-types = [normal, fighting, flying, poison, ground, rock, bug, ghost, steel, fire, water, grass, electric, psychic, dragon, dark, fairy]
+types = {normal.typeName.lower(): normal, fighting.typeName.lower(): fighting, flying.typeName.lower(): flying, poison.typeName.lower(): poison, 
+    ground.typeName.lower(): ground, rock.typeName.lower(): rock, bug.typeName.lower(): bug, ghost.typeName.lower(): ghost, 
+    steel.typeName.lower(): steel, fire.typeName.lower(): fire, water.typeName.lower(): water, grass.typeName.lower(): grass,
+    electric.typeName.lower(): electric, psychic.typeName.lower(): psychic, dragon.typeName.lower(): dragon, dark.typeName.lower(): dark, fairy.typeName.lower(): fairy}
 setTypes(fighting, [normal, rock, steel, ice, dark], [flying, poison, bug, psychic, fairy], [ghost])
 setTypes(flying, [fighting, bug, grass], [rock, steel, electric], [None])
 setTypes(poison, [grass, fairy], [poison, ground, rock, ghost], [steel])
