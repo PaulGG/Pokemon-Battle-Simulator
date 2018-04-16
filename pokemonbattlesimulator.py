@@ -310,7 +310,6 @@ defaultPokemonDatabase = {
 def readData(filename, defaultData):
     if not os.path.exists(filename):
         open(filename, "w")
-
     try:
         with open(filename, "rb") as inpuut:
             return pickle.load(inpuut)
@@ -395,16 +394,26 @@ def checkForAlivePokemon(player):
                 return True
     return False
 
-def getActivePokemon(playerPokemon, goBack):
-    activePokemons = []
+def getOptions(activePokemons, goBack):
+    options = []
     i = 1
+    for a in activePokemons:
+        options.append(str(i) + ". " + a.name)
+        i += 1
+    if goBack:
+        options.append(str(i) + ". Go Back")
+    return options
+
+def getActivePokemon(playerPokemon):
+    activePokemons = []
+    #i = 1
     for pokemon in playerPokemon:
         if pokemon:
             activePokemons.append(pokemon)
-            print(str(i) + ". " + pokemon.name)
-            i += 1
-    if goBack:
-        print(str(i) + ". Go Back ")
+            #print(str(i) + ". " + pokemon.name)
+            #i += 1
+    #if goBack:
+        #print(str(i) + ". Go Back ")
     return activePokemons
 
 # TODO: refactor
@@ -443,11 +452,14 @@ def determineDead(playerPokemon, enemyPokemon, wild):
                 won = True
                 break
             userInput = None
+            activePokemons = getActivePokemon(player.pokemon)
+            options = getOptions(activePokemons, False)
             while True:
-                activePokemons = getActivePokemon(player.pokemon, False)
                 try:
+                    for o in options:
+                        print(o)
                     #userInput = int(input("Please select a Pokemon. "))
-                    userInput = getInputWithConstraints("Please select a Pokemon.", None, 1, len(activePokemons))
+                    userInput = getInputWithConstraints("Please select a Pokemon. ", options, 1, len(activePokemons))
                     break
                 except ValueError:
                     print("Invalid Input!")
@@ -579,8 +591,11 @@ def playGame():
                     else:
                         clear()
                         breakout2 = False
+                        activePokemons = getActivePokemon(player.pokemon)
+                        options = getOptions(activePokemons, True)
                         while not breakout2:
-                            activePokemons = getActivePokemon(player.pokemon, True)
+                            for o in options:
+                                print(o)
                             #userInput2 = int(input("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". "))
                             userInput2 = getInputWithConstraints("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". ", None, 1, len(activePokemons) - 1)
                             selectSound()
@@ -613,7 +628,10 @@ def playGame():
             breakout = False
             while not breakout:
                 try:
-                    activePokemons = getActivePokemon(player.pokemon, True)
+                    activePokemons = getActivePokemon(player.pokemon)
+                    options = getOptions(activePokemons, True)
+                    for o in options:
+                        print(o)
                     userInput = int(input("Please select a Pokemon. "))
                     selectSound()
                     if userInput == len(activePokemons) + 1:
@@ -666,5 +684,6 @@ def resetPlayerPokemon(human):
             p.spDefense = p.defaultSpDefense
             p.speed = p.defaultSpeed
             p.fainted = False
+            p.moves.reset()
 
 main()

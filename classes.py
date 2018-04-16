@@ -212,7 +212,8 @@ class Move:
         self.accuracy = accuracy
         self.damageType = damageType
         self.type = type
-        self.pp = pp
+        self.maxPP = pp
+        self.pp = self.maxPP
 
     # TODO: fix
     def determineWeatherMoveDamage(self):
@@ -407,6 +408,11 @@ class MoveSet:
     def useMove4(self):
         return self.move4
 
+    def reset(self):
+        self.move1.pp = self.move1.maxPP
+        self.move2.pp = self.move2.maxPP
+        self.move3.pp = self.move3.maxPP
+        self.move4.pp = self.move4.maxPP
 class Type: 
     def __init__(self, typeName): 
         self.typeName = typeName 
