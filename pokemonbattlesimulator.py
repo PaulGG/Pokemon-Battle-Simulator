@@ -42,7 +42,7 @@ def getInputWithConstraints(message, options=None, min=None, max=None):
             usrInput = int(input(message))
             selectSound()
             if min and max: 
-                if usrInput < min and usrInput > max:
+                if usrInput < min or usrInput > max:
                     raise ValueError
             return usrInput
         except ValueError:
@@ -231,7 +231,7 @@ def battleAgain():
     while True:
         usrIn = None
         try:
-            usrIn = input("Would you like to play again? (yes/no) ")
+            usrIn = getTextInput("Would you like to play again? (yes/no) ")
             if usrIn.lower() == 'yes':
                 startBattle()
             else:
@@ -446,10 +446,9 @@ def determineDead(playerPokemon, enemyPokemon, wild):
             while True:
                 activePokemons = getActivePokemon(player.pokemon, False)
                 try:
-                    userInput = int(input("Please select a Pokemon. "))
-                    if userInput > len(activePokemons): 
-                        invalid()
-                    else: break
+                    #userInput = int(input("Please select a Pokemon. "))
+                    userInput = getInputWithConstraints("Please select a Pokemon.", None, 1, len(activePokemons))
+                    break
                 except ValueError:
                     print("Invalid Input!")
                     time.sleep(2)
@@ -562,35 +561,33 @@ def playGame():
         # TODO: refactor if possible
         def battleOption2():
             breakout = False
+            options = []
+            items = player.backpack.getAllItems()
+            i = 1
+            for item in items:
+                options.append(str(i) + ". " + item.name)
+                i += 1
+            options.append(str(i) + ". Go Back" )
             while not breakout:
                 try:
-                    items = player.backpack.getAllItems()
-                    i = 1
-                    for item in items:
-                        print(str(i) + ". " + item.name)
-                        i += 1
-                    print(str(i) + ". Go Back" )
-                    userInput = int(input("What will you do? "))
+                    userInput = getInputWithConstraints("What will you do? ", options, 1, len(items))
                     selectSound()
                     if userInput == len(items) + 1:
                         clear()
                         breakout = True
-                        continue
-                    if userInput > len(items) or userInput < 1:
-                    # go back
-                        invalid()
                         continue
                     else:
                         clear()
                         breakout2 = False
                         while not breakout2:
                             activePokemons = getActivePokemon(player.pokemon, True)
-                            userInput2 = int(input("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". "))
+                            #userInput2 = int(input("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". "))
+                            userInput2 = getInputWithConstraints("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". ", None, 1, len(activePokemons) - 1)
                             selectSound()
                             # TODO: "You can't pick a pokemon that doesnt exist!"
-                            if userInput2 > len(activePokemons):
-                                breakout2 = True
-                                continue
+                            #if userInput2 > len(activePokemons):
+                             #   breakout2 = True
+                              #  continue
                             select = player.pokemon[userInput2 - 1]
                             clear()
                             if select.fainted is False:
