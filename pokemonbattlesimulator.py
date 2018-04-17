@@ -44,6 +44,7 @@ def getInputWithConstraints(message, options=None, min=None, max=None):
             if min and max: 
                 if usrInput < min or usrInput > max:
                     raise ValueError
+            clear()
             return usrInput
         except ValueError:
             clear()
@@ -431,8 +432,6 @@ def determineDead(playerPokemon, enemyPokemon, wild):
             options = getOptions(activePokemons, False)
             while True:
                 try:
-                    for o in options:
-                        print(o)
                     userInput = getInputWithConstraints("Please select a Pokemon. ", options, 1, len(activePokemons))
                     break
                 except ValueError:
@@ -452,6 +451,8 @@ def determineDead(playerPokemon, enemyPokemon, wild):
                 print("You cannot select a fainted pokemon!")
                 time.sleep(2)
                 clear()
+        
+        return False
 
 #TODO: refactor
 def playGame():
@@ -477,21 +478,12 @@ def playGame():
 
         # refactor if possible
         def battleOption1():
-            m1 = True
-            m2 = True
+            # Content to presen to user before while loop.
             m3 = True
             m4 = True
-            usrMoves = []
-            if player.activePokemon.moves.move1:     
-                usrMoves.append("1. " + player.activePokemon.moves.move1.name + " (" + "PP: " + str(player.activePokemon.moves.move1.pp) +")")
-            else: 
-                m1 = False
-                usrMoves.append("1. None")
-            if player.activePokemon.moves.move2: 
-                usrMoves.append("2. " + player.activePokemon.moves.move2.name + " (" + "PP: " + str(player.activePokemon.moves.move2.pp) +")")
-            else: 
-                m2 = False
-                usrMoves.append("2. None")
+            usrMoves = []     
+            usrMoves.append("1. " + player.activePokemon.moves.move1.name + " (" + "PP: " + str(player.activePokemon.moves.move1.pp) +")")
+            usrMoves.append("2. " + player.activePokemon.moves.move2.name + " (" + "PP: " + str(player.activePokemon.moves.move2.pp) +")")
             if player.activePokemon.moves.move3: 
                 usrMoves.append("3. "+ player.activePokemon.moves.move3.name + " (" + "PP: " + str(player.activePokemon.moves.move3.pp) +")")
             else: 
@@ -509,27 +501,31 @@ def playGame():
                     if userInput is 5:
                         clear()
                         break
-                    elif (userInput is 1 and not m1) or (userInput is 2 and not m2) or (userInput is 3 and not m3) or (userInput is 4 and not m4):
+                    elif (userInput is 3 and not m3) or (userInput is 4 and not m4):
                         print("You cannot select a move that is None.")
                         time.sleep(3)
                         clear()
                         continue
                     else:
                         clear()
+                        # If orderDeterminer returns true, the player goes first. If false, the enemy goes first. 
                         if orderDeterminer(player.activePokemon, enemy.activePokemon):
                             playerAttack(userInput, player.activePokemon, enemy.activePokemon)
                             # is enemy pokemon dead?
                             if determineDead(player.activePokemon, enemy.activePokemon, enemy.activePokemon.wild):
-                                if won: break
-
+                                #if won: break
+                                break
+                            # If the enemy pokemon is not dead, it can attack.
                             else:
                                 enemyAttack(player.activePokemon, enemy.activePokemon)
+                                # Did the player die?
                                 determineDead(player.activePokemon, enemy.activePokemon, enemy.activePokemon.wild)
                             break
                         else:
                             enemyAttack(player.activePokemon, enemy.activePokemon)
                             if determineDead(player.activePokemon, enemy.activePokemon, enemy.activePokemon.wild):
-                                if won: break
+                                #if won: break
+                                break
                             else:
                                 playerAttack(userInput, player.activePokemon, enemy.activePokemon)
                                 determineDead(player.activePokemon, enemy.activePokemon, enemy.activePokemon.wild)
@@ -563,9 +559,7 @@ def playGame():
                         activePokemons = getActivePokemon(player.pokemon)
                         options = getOptions(activePokemons, True)
                         while not breakout2:
-                            for o in options:
-                                print(o)
-                            userInput2 = getInputWithConstraints("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". ", None, 1, len(activePokemons) + 1)
+                            userInput2 = getInputWithConstraints("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". ", options, 1, len(activePokemons) + 1)
                             selectSound()
                             select = player.pokemon[userInput2 - 1]
                             clear()
@@ -645,4 +639,5 @@ def resetPlayerPokemon(human):
             p.fainted = False
             p.moves.reset()
 
-main()
+if __name__ == "__main__":
+    main()
