@@ -245,29 +245,13 @@ def battleAgain():
                 break
         except: TypeError
 
-#def getNumericalInput(options, message):
- #   while True:
-  #      if options:
-   #         for o in options:
-    #            print(o)
-     #   try:
-      #      inpoot = int(input(message))
-       #     selectSound()
-        #    return inpoot
-        #except ValueError:
-         #   clear()
-          #  print("Invalid input!")
-           # time.sleep(2)
-            #clear()
-
 def main():
     clear()
     print("Welcome to Pokemon!")
     pygame.mixer.init()
     pygame.mixer.music.load("main_theme.wav")
     pygame.mixer.music.play()
-    
-    pygame.mixer.music.set_volume(1)
+    pygame.mixer.music.set_volume(0.2)
     time.sleep(2)
     clear()
     closing = False
@@ -277,10 +261,6 @@ def main():
         clear()
         closing = main_menu_chooser(userInput, closing)
              
-# Adding two pokemon to test everything.
-
-
-# Some default moves.
 earthquake = Move("Earthquake", 100, 100, "physical", ground, 10)
 flamethrower = Move("Flamethrower", 90, 100, "special", fire, 15)
 dragon_pulse = Move("Dragon Pulse", 85, 100, "special", dragon, 10)
@@ -406,14 +386,9 @@ def getOptions(activePokemons, goBack):
 
 def getActivePokemon(playerPokemon):
     activePokemons = []
-    #i = 1
     for pokemon in playerPokemon:
         if pokemon:
             activePokemons.append(pokemon)
-            #print(str(i) + ". " + pokemon.name)
-            #i += 1
-    #if goBack:
-        #print(str(i) + ". Go Back ")
     return activePokemons
 
 # TODO: refactor
@@ -458,7 +433,6 @@ def determineDead(playerPokemon, enemyPokemon, wild):
                 try:
                     for o in options:
                         print(o)
-                    #userInput = int(input("Please select a Pokemon. "))
                     userInput = getInputWithConstraints("Please select a Pokemon. ", options, 1, len(activePokemons))
                     break
                 except ValueError:
@@ -531,12 +505,7 @@ def playGame():
             usrMoves.append("5. Go Back")
             while True:
                 try:
-                    #userInput = int(input("What will you do? "))
                     userInput = getInputWithConstraints("What will you do? ", usrMoves, 1, 5)
-                    #if userInput not in [1, 2, 3, 4, 5]:
-                     #   invalid()
-                      #  clear()
-                       # continue
                     if userInput is 5:
                         clear()
                         break
@@ -582,7 +551,7 @@ def playGame():
             options.append(str(i) + ". Go Back" )
             while not breakout:
                 try:
-                    userInput = getInputWithConstraints("What will you do? ", options, 1, len(items))
+                    userInput = getInputWithConstraints("What will you do? ", options, 1, len(items) + 1)
                     selectSound()
                     if userInput == len(items) + 1:
                         clear()
@@ -596,13 +565,8 @@ def playGame():
                         while not breakout2:
                             for o in options:
                                 print(o)
-                            #userInput2 = int(input("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". "))
-                            userInput2 = getInputWithConstraints("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". ", None, 1, len(activePokemons) - 1)
+                            userInput2 = getInputWithConstraints("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". ", None, 1, len(activePokemons) + 1)
                             selectSound()
-                            # TODO: "You can't pick a pokemon that doesnt exist!"
-                            #if userInput2 > len(activePokemons):
-                             #   breakout2 = True
-                              #  continue
                             select = player.pokemon[userInput2 - 1]
                             clear()
                             if select.fainted is False:
@@ -630,16 +594,11 @@ def playGame():
                 try:
                     activePokemons = getActivePokemon(player.pokemon)
                     options = getOptions(activePokemons, True)
-                    for o in options:
-                        print(o)
-                    userInput = int(input("Please select a Pokemon. "))
+                    userInput = getInputWithConstraints("please select a Pokemon. ", options, 1, len(activePokemons) + 1)
                     selectSound()
                     if userInput == len(activePokemons) + 1:
                         clear()
                         break
-                    elif userInput > len(activePokemons) or userInput < 1:
-                        invalid()
-                        continue
                     else:
                         clear()
                         select = player.pokemon[userInput - 1]
