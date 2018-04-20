@@ -1,6 +1,6 @@
 import random
 import copy
-from classes import Environment, Move, Pokemon, Player, MoveSet, Backpack, FullRestore, environment
+from classes import *
 from pokemontypes import flying, poison, ground, rock, fire, grass, dragon, types, water, ice
 import os
 import time
@@ -12,6 +12,25 @@ import pygame
 clear = lambda: os.system('cls')
 
 selectSound = lambda: winsound.PlaySound("select_sound.wav", winsound.SND_ASYNC | winsound.SND_FILENAME)
+
+def readData(filename, defaultData):
+    if not os.path.exists(filename):
+        open(filename, "w")
+        with open(filename, "wb") as output:
+            pickle.dump(defaultData, output, pickle.HIGHEST_PROTOCOL)
+    try:
+        with open(filename, "rb") as inpuut:
+            return pickle.load(inpuut)
+    except EOFError:
+        #with open(filename, "wb") as output:
+         #   pickle.dump(defaultData, output, pickle.HIGHEST_PROTOCOL)
+        open(filename, "w")
+        with open(filename, "wb") as output:
+            pickle.dump(defaultData, output, pickle.HIGHEST_PROTOCOL)
+
+def writeData(filename, data):
+    with open(filename, "wb") as output:
+        pickle.dump(data, output, pickle.HIGHEST_PROTOCOL)
 
 def optionOne():
     startBattle()
@@ -25,6 +44,7 @@ def getTextInput(message):
             selectSound()
             confirm = input("Your input is " + usrInput + ". Are you sure? (type y to continue) ")
             selectSound()
+            clear()
             if confirm == "y":
                 return usrInput
         except ValueError:
@@ -33,13 +53,20 @@ def getTextInput(message):
             time.sleep(2)
             clear()
 
-def getInputWithConstraints(message, options=None, min=None, max=None):
+def getInputWithConstraints(message, exitable, options=None, min=None, max=None, double=None):
     while True:
         if options:
             for o in options:
                 print(o)
         try:
-            usrInput = int(input(message))
+            usrInput = input(message)
+            if usrInput == "~" and exitable: 
+                clear()
+                return usrInput
+            if double:
+                usrInput = float(usrInput)
+            else:
+                usrInput = int(usrInput)
             selectSound()
             if min and max: 
                 if usrInput < min or usrInput > max:
@@ -78,16 +105,17 @@ def getMoveInput(num):
         clear()
         return move
     while True:
-        pType = getTextInput("Please enter the Pokemon type of this move. ")
-        if types.get(pType):
+        upType = getTextInput("Please enter the Pokemon type of this move. ")
+        if types.get(upType):
+            pType = types.get(upType)
             break
         print("That isn't a valid type.")
         time.sleep(2)
         clear()
     dmgType = getTextInput("Please enter if this is a physical or special move damage type. ")
-    accuracy = getInputWithConstraints("Please enter an accuracy value (10 to 100) ", None, 10, 100)
-    damage = getInputWithConstraints("Please enter a damage value (50 to 150) ", None, 50, 150)
-    PP = getInputWithConstraints("Please enter the power point (PP) value (5 to 50) ", None, 5, 50)
+    accuracy = getInputWithConstraints("Please enter an accuracy value (10 to 100) ", True, None, 10, 100)
+    damage = getInputWithConstraints("Please enter a damage value (50 to 150) ", None, True, 50, 150)
+    PP = getInputWithConstraints("Please enter the power point (PP) value (5 to 50) ", True, None, 5, 50)
     return Move(name, damage, accuracy, dmgType, pType, PP)
 
 def getMovesInput():
@@ -127,9 +155,38 @@ def typeInput(msg, prim):
         clear()
 
 def optionTwo():
-    print("TODO")
+    def itemChooser(args):
+        switcher = {
+            1: Potion,
+            2: SuperPotion,
+            3: HyperPotion,
+            4: MaxPotion,
+            5: FullRestore,
+            6: Revive,
+            7: MaxRevive
+        }
+        if args is 8:
+            return False
+        else:
+            switcher.get(args, invalid)().buyItem(player)
+            return True
+
+    pygame.mixer.music.load("shop_theme.wav")
+    pygame.mixer.music.play(loops=-1)
+    #print("TODO")
+    print("Welcome to the Pokemart.")
     time.sleep(2)
     clear()
+    options = ["1. Potion - restores 20 HP. $300", "2. Super Potion - restores 60 HP. $700", "3. Hyper Potion - restores 200 HP. $1200", 
+    "4. Max Potion - restores max HP. $2500", "5. Full Restore - restores max HP and clears status effects. $3000", "6. Revive - heals a fainted Pokemon halfway. $1500", 
+    "7. Max Revive - heals a fainted pokemon completely. $2000", "8. Go back"]
+    myBool = True
+    while myBool:
+        usrIn = getInputWithConstraints("Please select an item you would like to purchase. ", False, options, 1, 8)
+        myBool = itemChooser(usrIn)
+        writeData("player_data.pkl", player)
+    pygame.mixer.music.load("main_theme.wav")
+    pygame.mixer.music.play(loops=-1)
 
 def optionThree():
     clear()
@@ -140,22 +197,50 @@ def optionThree():
     print("Enemies will be randomly assigned pokemon in the save game. If you make an overpowered pokemon, then the enemy might get it!")
     time.sleep(2)
     clear()
-    name = getTextInput("Please enter the name of the pokemon that you would like to create. ")
+    name = getTextInput("Please enter the name of the pokemon that you would like to create. (~ to exit) ")
+    if name == "~": return
     newPokemon = pokemonDatabase.get(name.lower())
     if newPokemon:
         print("This pokemon is already in the database.")
         time.sleep(2)
         clear()
         return
-    hpStat = getInputWithConstraints("Please enter the HP stat. (between 1-255) ", None, 1, 255)
-    attackStat = getInputWithConstraints("Please enter the attack stat. (between 1-255) ", None, 1, 255)
-    defenseStat = getInputWithConstraints("Please enter the defense stat. (between 1-255) ", None, 1, 255)
-    spAttackStat = getInputWithConstraints("Please enter the special attack stat. (between 1-255) ", None, 1, 255)
-    spDefenseStat = getInputWithConstraints("Please enter the special defense stat. (between 1-255) ", None, 1, 255)
-    speedStat = getInputWithConstraints("Please enter the speed stat. (between 1-255) ", None, 1, 255)
+    hpStat = getInputWithConstraints("Please enter the HP stat. (between 1-255) (~ to exit) ", True, None, 1, 255)
+    if hpStat == "~": 
+        clear()
+        return
+    attackStat = getInputWithConstraints("Please enter the attack stat. (between 1-255) (~ to exit) ", True, None, 1, 255)
+    if attackStat == "~":
+        clear()
+        return
+    defenseStat = getInputWithConstraints("Please enter the defense stat. (between 1-255) (~ to exit) ", True, None, 1, 255)
+    if defenseStat == "~": 
+        clear()
+        return
+    spAttackStat = getInputWithConstraints("Please enter the special attack stat. (between 1-255) (~ to exit) ", True, None, 1, 255)
+    if spAttackStat == "~": 
+        clear()
+        return
+    spDefenseStat = getInputWithConstraints("Please enter the special defense stat. (between 1-255) (~ to exit) ", True, None, 1, 255)
+    if spDefenseStat == "~": 
+        clear()
+        return
+    speedStat = getInputWithConstraints("Please enter the speed stat. (between 1-255) (~ to exit) ", True, None, 1, 255)
+    if speedStat == "~": 
+        clear()
+        return
     moves = getMovesInput()
-    type1 = typeInput("Please enter the pokemon's primary type. ", 1)
-    type2 = typeInput("Please enter the pokemon's secondary type. If it does not have one, type 'none'. ", 2)
+    if moves == "~": 
+        clear()
+        return
+    type1 = typeInput("Please enter the pokemon's primary type. (~ to exit) ", 1)
+    if type1 == "~": 
+        clear()
+        return
+    type2 = typeInput("Please enter the pokemon's secondary type. If it does not have one, type 'none'. (~ to exit) ", 2)
+    if type2 == "~": 
+        clear()
+        return
     hpIV = round(random.random() * 31)
     attackIV = round(random.random() * 31)
     defenseIV = round(random.random() * 31)
@@ -175,7 +260,10 @@ def optionThree():
     passive = None#input("Please enter your pokemon's passive.")
     healthStatus = None
     itemHeld = None
-    level = getInputWithConstraints("Please enter the level for the Pokemon. (1 to 100) ", None, 1, 100)
+    level = getInputWithConstraints("Please enter the level for the Pokemon. (1 to 100) (~ to exit)", True, None, 1, 100)
+    if level == "~": 
+        clear()
+        return
     newPokemon = Pokemon(name, hpStat, attackStat, defenseStat, spAttackStat, spDefenseStat, speedStat, level, moves, type1, type2, hpIV, 
         attackIV, defenseIV, spAttackIV, spDefenseIV, speedIV, hpEV, attackEV, defenseEV, spAttackEV, spDefenseEV, speedEV, nature, 
         growthRate, passive, healthStatus, itemHeld, False)
@@ -202,15 +290,11 @@ def optionFour():
     while True:
         print("Here are the pokemon currently on your team: ")
         printPokemonWithEmptySlots(player.pokemon, False)
-        strIn = getTextInput("Please enter a pokemon that you would like on your team. (enter a number to return to main menu) ")
-        # search database
-        try:
-            int(strIn)
+        strIn = getTextInput("Please enter a pokemon that you would like on your team. (~ to exit) ")
+        if strIn == "~": 
             clear()
-            return
-        except ValueError:
-            # do nothing.
-            None
+            break
+        # search database
         clear()
         usrSelect = pokemonDatabase.get(strIn.lower(), None)
         if usrSelect:
@@ -219,14 +303,19 @@ def optionFour():
             for p in player.pokemon:
                 if p:
                     counter += 1
-            intIn = getInputWithConstraints("Which pokemon would you like to replace? ", None, 1, counter)
+            intIn = getInputWithConstraints("Which pokemon would you like to replace? (~ to exit) ", True, None, 1, counter)
+            if intIn == "~":
+                clear()
+                break
             player.pokemon[intIn - 1] = copy.deepcopy(usrSelect)
             player.setActivePokemon()
+            writeData("player_data.pkl", player)
             return
         else:
             print("That pokemon was not found in the database.")
             time.sleep(2)
             clear()
+    writeData("player_data.pkl", player)
 
 def optionFive():
     move = getMoveInput(1)
@@ -241,6 +330,44 @@ def optionSix():
     
 
 def optionSeven():
+    for i in player.backpack.getAllItems():
+        print(i.name)
+    time.sleep(5)
+    clear()
+
+defaultGameVolume = 1
+defaultMuted = False
+
+gameVolume = readData("game_volume.pkl", defaultGameVolume)
+muted = readData("game_muted.pkl", defaultMuted)
+
+def optionEight():
+    global muted
+    global gameVolume
+    options = ["1. Volume Strength", "2. Mute/Unmute Volume", "3. Back to Main Menu"]
+    usrIn = getInputWithConstraints("Please select a setting. ", False, options, 1, 3)
+    if usrIn is 1:
+        if muted:
+            print("Cannot change volume because game is muted. Please unmute in settings.")
+            time.sleep(2)
+            clear()
+        else:
+            usrIn2 = getInputWithConstraints("Please select a value between 0.0 and 1.0. (~ to exit) ", True, None, 0.0, 1.0, True)
+            gameVolume = usrIn2
+            pygame.mixer.music.set_volume(gameVolume)
+            writeData("game_volume.pkl", gameVolume)
+    elif usrIn is 2:
+        if muted:
+            pygame.mixer.music.set_volume(gameVolume)
+            muted = False
+        else:
+            pygame.mixer.music.set_volume(0.0)
+            muted = True
+        writeData("game_muted.pkl", muted)
+    elif usrIn is 3:
+        return
+
+def optionNine():
     clear()
     print("Goodbye!")
     time.sleep(2)
@@ -258,10 +385,12 @@ def main_menu_chooser(args, closing):
         3: optionThree,
         4: optionFour,
         5: optionFive,
-        6: optionSix
+        6: optionSix,
+        7: optionSeven,
+        8: optionEight
     }
-    if args is 7:
-        optionSeven()
+    if args is 9:
+        optionNine()
         return True
     else:
         switcher.get(args, invalid)()
@@ -283,28 +412,31 @@ def battleAgain():
                 startBattle()
             else:
                 clear()
-                print("Returning to main menu...")
-                time.sleep(2)
-                clear()
                 pygame.mixer.music.stop()
                 pygame.mixer.music.load("main_theme.wav")
-                pygame.mixer.music.play()
+                pygame.mixer.music.play(loops=-1)
                 break
         except: TypeError
 
 def main():
+    global gameVolume
+    global muted
     clear()
     print("Welcome to Pokemon!")
     pygame.mixer.init()
     pygame.mixer.music.load("main_theme.wav")
-    pygame.mixer.music.play()
-    pygame.mixer.music.set_volume(0.2)
-    time.sleep(2)
+    pygame.mixer.music.play(loops=-1)
+    if muted:
+        pygame.mixer.music.set_volume(0.0)
+    else:
+        pygame.mixer.music.set_volume(gameVolume)
+    time.sleep(1)
     clear()
     closing = False
-    options = ["1. Battle", "2. Buy Items", "3. Create new Pokemon", "4. Create your Pokemon Team", "5. Create new Move", "6. Print Current Team", "7. Close program."]
     while not closing:
-        userInput = getInputWithConstraints("Please select one of the following options. ", options)
+        options = ["Current Money Balance: $" + str(player.getMoney()), "-----------------------------" ,"1. Battle", "2. Buy Items", "3. Create new Pokemon",
+         "4. Create your Pokemon Team", "5. Create new Move", "6. Print Current Team", "7. Show Backpack Items", "8. Settings", "9. Close program.", "-----------------------------"]
+        userInput = getInputWithConstraints("Please select one of the following options. ", False, options)
         clear()
         closing = main_menu_chooser(userInput, closing)
              
@@ -339,27 +471,16 @@ defaultMovesDatabase = {
 defaultPokemonDatabase = {
     charizard.name.lower(): charizard, venusaur.name.lower(): venusaur
 }
-
-def readData(filename, defaultData):
-    if not os.path.exists(filename):
-        open(filename, "w")
-    try:
-        with open(filename, "rb") as inpuut:
-            return pickle.load(inpuut)
-    except EOFError:
-        with open(filename, "wb") as output:
-            pickle.dump(defaultData, output, pickle.HIGHEST_PROTOCOL)
-
-def writeData(filename, data):
-    with open(filename, "wb") as output:
-        pickle.dump(data, output, pickle.HIGHEST_PROTOCOL)
     
 movesDatabase = readData("moves_data.pkl", defaultMovesDatabase)
 pokemonDatabase = readData("pokemon_data.pkl", defaultPokemonDatabase)
-
+writeData("moves_data.pkl", movesDatabase)
+writeData("pokemon_data.pkl", pokemonDatabase)
 # TODO: save player's team to database
 defaultPlayer = Player([copy.deepcopy(venusaur), copy.deepcopy(charizard), None, None, None, None], Backpack([]))
 player = readData("player_data.pkl", defaultPlayer)
+writeData("player_data.pkl", player)
+
 enemy = Player([None, None, None, None, None, None], None)
 
 for i in range(0, 6):
@@ -477,6 +598,7 @@ def determineDead(playerPokemon, enemyPokemon, wild):
             clear()
             print("The enemy has no more pokemon! You win!")
             player.giveMoney(500)
+            writeData("player_data.pkl", player)
             global won
             won = True
         else:
@@ -494,7 +616,7 @@ def determineDead(playerPokemon, enemyPokemon, wild):
             if not checkForAlivePokemon(player):
                 print("You have no more pokemon! You lose. :(")
                 player.takeMoney(500)
-                print("You paid ")
+                writeData("player_data.pkl", player)
                 won = True
                 break
             userInput = None
@@ -502,7 +624,7 @@ def determineDead(playerPokemon, enemyPokemon, wild):
             options = getOptions(activePokemons, False)
             while True:
                 try:
-                    userInput = getInputWithConstraints("Please select a Pokemon. ", options, 1, len(activePokemons))
+                    userInput = getInputWithConstraints("Please select a Pokemon. ", False, options, 1, len(activePokemons))
                     break
                 except ValueError:
                     print("Invalid Input!")
@@ -528,7 +650,7 @@ def determineDead(playerPokemon, enemyPokemon, wild):
 def playGame():
     pygame.mixer.music.stop()
     pygame.mixer.music.load("battle_music.wav")
-    pygame.mixer.music.play()
+    pygame.mixer.music.play(loops=-1)
     global won
     won = False
     resetPlayerPokemon(player)
@@ -543,7 +665,7 @@ def playGame():
         pStatus = "Pokemon Status: " + player.activePokemon.name + " HP: " + str(player.activePokemon.hp) + " | Level: " + str(player.activePokemon.level)
         eStatus = "Enemy Pokemon Status: " + enemy.activePokemon.name + " HP: " + str(enemy.activePokemon.hp)+ " | Level: " + str(enemy.activePokemon.level)
         options = [pStatus, eStatus, "1. Fight", "2. Bag", "3. Pokemon"]
-        userInput = getInputWithConstraints("What will you do? ", options)
+        userInput = getInputWithConstraints("What will you do? ", False, options)
         clear()
 
         # refactor if possible
@@ -567,7 +689,7 @@ def playGame():
             usrMoves.append("5. Go Back")
             while True:
                 try:
-                    userInput = getInputWithConstraints("What will you do? ", usrMoves, 1, 5)
+                    userInput = getInputWithConstraints("What will you do? ", False, usrMoves, 1, 5)
                     if userInput is 5:
                         clear()
                         break
@@ -617,7 +739,7 @@ def playGame():
             options.append(str(i) + ". Go Back" )
             while not breakout:
                 try:
-                    userInput = getInputWithConstraints("What will you do? ", options, 1, len(items) + 1)
+                    userInput = getInputWithConstraints("What will you do? ", False, options, 1, len(items) + 1)
                     selectSound()
                     if userInput == len(items) + 1:
                         clear()
@@ -629,15 +751,25 @@ def playGame():
                         activePokemons = getActivePokemon(player.pokemon)
                         options = getOptions(activePokemons, True)
                         while not breakout2:
-                            userInput2 = getInputWithConstraints("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". ", options, 1, len(activePokemons) + 1)
+                            userInput2 = getInputWithConstraints("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". ", False, options, 1, len(activePokemons) + 1)
                             selectSound()
                             select = player.pokemon[userInput2 - 1]
                             clear()
-                            if select.fainted is False:
+                            if (select.fainted is False and not isinstance(player.backpack.items[userInput - 1], RevivalItem)) or (select.fainted is True and isinstance(player.backpack.items[userInput - 1], RevivalItem)):
+                                # Instances: 
+                                #            fainted = true, revival item. TRUE!
+                                 #            fainted = false, other item. TRUE!
+                                #            fainted = true, othr item. FALSE!
+                                #            fainted = false, revival item. FALSE!
+                               
                                 player.backpack.useItem(userInput - 1, select)
                                 break
+                            elif select.fainted and not isinstance(player.backpack.items[userInput - 1, RevivalItem]):
+                                print("You cannot use a healing item on a fainted pokemon!")
+                                time.sleep(2)
+                                clear()
                             else:
-                                print("You cannot select a fainted pokemon!")
+                                print("You cannot use a revive item on a pokemon that is alive!")
                                 time.sleep(2)
                                 clear()
                         if not breakout2:
@@ -658,7 +790,7 @@ def playGame():
                 try:
                     activePokemons = getActivePokemon(player.pokemon)
                     options = getOptions(activePokemons, True)
-                    userInput = getInputWithConstraints("please select a Pokemon. ", options, 1, len(activePokemons) + 1)
+                    userInput = getInputWithConstraints("please select a Pokemon. ", False, options, 1, len(activePokemons) + 1)
                     selectSound()
                     if userInput == len(activePokemons) + 1:
                         clear()

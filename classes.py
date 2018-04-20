@@ -3,6 +3,7 @@ import abc
 import math
 import time
 import os
+import copy
 
 clear = lambda: os.system('cls')
 class Player: 
@@ -37,9 +38,12 @@ class Player:
     
     def giveMoney(self, amount):
         self.money += amount
-        print("You were given $500.")
+        print("You were given $" + str(amount) + ".")
         time.sleep(2)
         clear()
+
+    def getMoney(self):
+        return self.money
  
 class Backpack:
     def __init__(self, items):
@@ -56,18 +60,49 @@ class Backpack:
         self.items.append(item)
 
 class Item:
-    def __init__(self, name):
+    def __init__(self, name, price):
         self.name = name
+        self.price = price
 
     @abc.abstractmethod
     def use(self, user):
         """Please define what the item will do in this function."""
         return
 
+    def buyItem(self, player):
+        if(player.money - self.price >= 0):
+            player.money -= self.price
+            player.backpack.addItem(copy.deepcopy(self))
+            print("You purchased the " + self.name + ".")
+            time.sleep(2)
+            clear()
+        else:
+            print("You do not have enough money to afford the " + self.name + "!")
+            time.sleep(2)
+            clear()
+
+class RevivalItem(Item):
+    def __init__(self, name, reviveLevel, price):
+        Item.__init__(self, name, price)
+        self.reviveLevel = reviveLevel
+    
+    def use(self, user):
+        hpToRestore = user.maxHp * self.reviveLevel
+        user.hp += hpToRestore
+        user.fainted = False
+
+class Revive(RevivalItem):
+    def __init__(self):
+        RevivalItem.__init__(self, "Revive", 0.5, 1500)
+        
+class MaxRevive(RevivalItem):
+    def __init__(self):
+        RevivalItem.__init__(self, "Revive", 1, 2000)
+
 class HealingItem(Item):
     # Max is a boolean that determines if the item is supposed to fully restore the user's HP or not.
-    def __init__(self, name, healthValue, max):
-        Item.__init__(self, name)
+    def __init__(self, name, max, price, healthValue=None):
+        Item.__init__(self, name, price)
         self.healthValue = healthValue
         self.max = max
     
@@ -84,33 +119,27 @@ class HealingItem(Item):
     
 class FullRestore(HealingItem):
     def __init__(self):
-        HealingItem.__init__(self, "Full Restore", 9999, True)
+        HealingItem.__init__(self, "Full Restore", True, 3000)
 
 class Potion(HealingItem):
-    def __init__(self, name):
-        HealingItem.__init__(self, "Potion", 20, False)
+    def __init__(self):
+        HealingItem.__init__(self, "Potion", False, 300, 20)
 
 class SuperPotion(HealingItem):
     def __init__(self):
-        HealingItem.__init__(self, "Super Potion", 60, False)
+        HealingItem.__init__(self, "Super Potion", False, 700, 60)
 
 class HyperPotion(HealingItem):
     def __init__(self):
-        HealingItem.__init__(self, "Hyper Potion", 200, False)
+        HealingItem.__init__(self, "Hyper Potion", False, 1200, 200)
 
 class MaxPotion(HealingItem):
     def __init__(self):
-        HealingItem.__init__(self, "Max Potion", 9999, True)
+        HealingItem.__init__(self, "Max Potion", True, 2500)
 
     def use(self, user):
-        user.hp += 60
-        print("You used the super potion.")
-        time.sleep(2)
-        print("Restored " + user.name + "'s HP to " + str(user.hp) + ".")
-        time.sleep(2)
-        clear()
-
-
+        HealingItem.use(user)
+        user.healthStatus = "normal"
 
 class Pokemon:
     def __init__(self, name, hpStat, attackStat, defenseStat, spAttackStat, spDefenseStat, speedStat, level, moves, type1, type2, hpIV, 
