@@ -1,7 +1,7 @@
 import random
 import copy
 from classes import Environment, Move, Pokemon, Player, MoveSet, Backpack, FullRestore, environment
-from pokemontypes import flying, poison, ground, rock, fire, grass, dragon, types, water
+from pokemontypes import flying, poison, ground, rock, fire, grass, dragon, types, water, ice
 import os
 import time
 import pickle
@@ -85,9 +85,9 @@ def getMoveInput(num):
         time.sleep(2)
         clear()
     dmgType = getTextInput("Please enter if this is a physical or special move damage type. ")
-    accuracy = getInputWithConstraints("Please enter an accuracy value (10 to 100) ", 10, 100)
-    damage = getInputWithConstraints("Please enter a damage value (50 to 150) ", 50, 150)
-    PP = getInputWithConstraints("Please enter the power point (PP) value (5 to 50) ", 5, 50)
+    accuracy = getInputWithConstraints("Please enter an accuracy value (10 to 100) ", None, 10, 100)
+    damage = getInputWithConstraints("Please enter a damage value (50 to 150) ", None, 50, 150)
+    PP = getInputWithConstraints("Please enter the power point (PP) value (5 to 50) ", None, 5, 50)
     return Move(name, damage, accuracy, dmgType, pType, PP)
 
 def getMovesInput():
@@ -147,12 +147,12 @@ def optionThree():
         time.sleep(2)
         clear()
         return
-    hpStat = getInputWithConstraints("Please enter the HP stat. (between 1-255) ", 1, 255)
-    attackStat = getInputWithConstraints("Please enter the attack stat. (between 1-255) ", 1, 255)
-    defenseStat = getInputWithConstraints("Please enter the defense stat. (between 1-255) ", 1, 255)
-    spAttackStat = getInputWithConstraints("Please enter the special attack stat. (between 1-255) ", 1, 255)
-    spDefenseStat = getInputWithConstraints("Please enter the special defense stat. (between 1-255) ", 1, 255)
-    speedStat = getInputWithConstraints("Please enter the speed stat. (between 1-255) ", 1, 255)
+    hpStat = getInputWithConstraints("Please enter the HP stat. (between 1-255) ", None, 1, 255)
+    attackStat = getInputWithConstraints("Please enter the attack stat. (between 1-255) ", None, 1, 255)
+    defenseStat = getInputWithConstraints("Please enter the defense stat. (between 1-255) ", None, 1, 255)
+    spAttackStat = getInputWithConstraints("Please enter the special attack stat. (between 1-255) ", None, 1, 255)
+    spDefenseStat = getInputWithConstraints("Please enter the special defense stat. (between 1-255) ", None, 1, 255)
+    speedStat = getInputWithConstraints("Please enter the speed stat. (between 1-255) ", None, 1, 255)
     moves = getMovesInput()
     type1 = typeInput("Please enter the pokemon's primary type. ", 1)
     type2 = typeInput("Please enter the pokemon's secondary type. If it does not have one, type 'none'. ", 2)
@@ -175,7 +175,7 @@ def optionThree():
     passive = None#input("Please enter your pokemon's passive.")
     healthStatus = None
     itemHeld = None
-    level = getInputWithConstraints("Please enter the level for the Pokemon. (1 to 100) ", 1, 100)
+    level = getInputWithConstraints("Please enter the level for the Pokemon. (1 to 100) ", None, 1, 100)
     newPokemon = Pokemon(name, hpStat, attackStat, defenseStat, spAttackStat, spDefenseStat, speedStat, level, moves, type1, type2, hpIV, 
         attackIV, defenseIV, spAttackIV, spDefenseIV, speedIV, hpEV, attackEV, defenseEV, spAttackEV, spDefenseEV, speedEV, nature, 
         growthRate, passive, healthStatus, itemHeld, False)
@@ -183,11 +183,49 @@ def optionThree():
     writeData("pokemon_data.pkl", pokemonDatabase)
     clear()
 
+def printPokemonWithEmptySlots(pokemon, goBack):
+    for i in range (1, 7):
+        if pokemon[i - 1] is not None:
+            print(str(i) + ". " + pokemon[i - 1].name)
+        else:
+            print(str(i) + ". Empty Slot")
+    if goBack:
+        i += 1
+        print(str(i) + ". Go Back")
 
+# CREATE POKEMON TEAM
 def optionFour():
-    print("TODO")
-    time.sleep(2)
+    #print("TODO")
+    #time.sleep(2)
     clear()
+    # print user current team\
+    while True:
+        print("Here are the pokemon currently on your team: ")
+        printPokemonWithEmptySlots(player.pokemon, False)
+        strIn = getTextInput("Please enter a pokemon that you would like on your team. (enter a number to return to main menu) ")
+        # search database
+        try:
+            int(strIn)
+            clear()
+            return
+        except ValueError:
+            # do nothing.
+            None
+        clear()
+        usrSelect = pokemonDatabase.get(strIn.lower(), None)
+        if usrSelect:
+            printPokemonWithEmptySlots(player.pokemon, True)
+            counter = 1
+            for p in player.pokemon:
+                if p:
+                    counter += 1
+            intIn = getInputWithConstraints("Which pokemon would you like to replace? ", None, 1, counter)
+            player.pokemon[intIn - 1] = copy.deepcopy(usrSelect)
+            return
+        else:
+            print("That pokemon was not found in the database.")
+            time.sleep(2)
+            clear()
 
 def optionFive():
     move = getMoveInput(1)
@@ -196,6 +234,12 @@ def optionFive():
     clear()
 
 def optionSix():
+    printPokemonWithEmptySlots(player.pokemon, False)
+    time.sleep(5)
+    clear()
+    
+
+def optionSeven():
     clear()
     print("Goodbye!")
     time.sleep(2)
@@ -212,10 +256,11 @@ def main_menu_chooser(args, closing):
         2: optionTwo,
         3: optionThree,
         4: optionFour,
-        5: optionFive
+        5: optionFive,
+        6: optionSix
     }
-    if args is 6:
-        optionSix()
+    if args is 7:
+        optionSeven()
         return True
     else:
         switcher.get(args, invalid)()
@@ -256,7 +301,7 @@ def main():
     time.sleep(2)
     clear()
     closing = False
-    options = ["1. Battle", "2. Buy Items", "3. Create new Pokemon", "4. Create your Pokemon Team", "5. Create new Move", "6. Close program."]
+    options = ["1. Battle", "2. Buy Items", "3. Create new Pokemon", "4. Create your Pokemon Team", "5. Create new Move", "6. Print Current Team", "7. Close program."]
     while not closing:
         userInput = getInputWithConstraints("Please select one of the following options. ", options)
         clear()
