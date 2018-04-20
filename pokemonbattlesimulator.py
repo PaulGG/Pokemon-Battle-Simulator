@@ -221,6 +221,7 @@ def optionFour():
                     counter += 1
             intIn = getInputWithConstraints("Which pokemon would you like to replace? ", None, 1, counter)
             player.pokemon[intIn - 1] = copy.deepcopy(usrSelect)
+            player.setActivePokemon()
             return
         else:
             print("That pokemon was not found in the database.")
@@ -321,8 +322,14 @@ dragon_pulse, rock_slide), fire, flying, 31, 31,
 venusaur = Pokemon("Venusaur", 80, 82, 83, 100, 100, 80, 50, MoveSet(solar_beam, earthquake, hidden_power, energy_ball), grass, poison, 31, 31, 31, 31, 31, 31, 252, 252, 252, 252, 252, 252, 1.1,
 "medium_slow", "something", None, None, False)
 
-player = Player([copy.deepcopy(venusaur), copy.deepcopy(charizard), None, None, None, None], Backpack([FullRestore(), FullRestore(), FullRestore()]))
-enemy = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], None)
+# function from Pasha, StackOverFlow
+def get_nth_key(dictionary, n=0):
+    if n < 0:
+        n += len(dictionary)
+    for i, key in enumerate(dictionary.keys()):
+        if i == n:
+            return key
+    raise IndexError("dictionary index out of range") 
 
 defaultMovesDatabase = {
     earthquake.name.lower(): earthquake, flamethrower.name.lower(): flamethrower, dragon_pulse.name.lower(): dragon_pulse, rock_slide.name.lower(): rock_slide, solar_beam.name.lower(): 
@@ -349,6 +356,21 @@ def writeData(filename, data):
     
 movesDatabase = readData("moves_data.pkl", defaultMovesDatabase)
 pokemonDatabase = readData("pokemon_data.pkl", defaultPokemonDatabase)
+
+# TODO: save player's team to database
+defaultPlayer = Player([copy.deepcopy(venusaur), copy.deepcopy(charizard), None, None, None, None], Backpack([]))
+player = readData("player_data.pkl", defaultPlayer)
+enemy = Player([None, None, None, None, None, None], None)
+
+for i in range(0, 6):
+    cap = len(pokemonDatabase) - 1
+    sel = round(random.random() * cap)
+    enemy.pokemon[i] = copy.deepcopy(pokemonDatabase.get(get_nth_key(pokemonDatabase, sel)))
+#enemy.activePokemon = enemy.pokemon[0]
+
+enemy = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], None)
+enemy.setActivePokemon()
+
 
 def orderDeterminer(playerPokemon, enemyPokemon):
     # Order is random if both pokemon's speed stats are identical.
@@ -454,6 +476,7 @@ def determineDead(playerPokemon, enemyPokemon, wild):
         if enemy.activePokemon.fainted:
             clear()
             print("The enemy has no more pokemon! You win!")
+            player.giveMoney(500)
             global won
             won = True
         else:
@@ -470,6 +493,8 @@ def determineDead(playerPokemon, enemyPokemon, wild):
         while True:
             if not checkForAlivePokemon(player):
                 print("You have no more pokemon! You lose. :(")
+                player.takeMoney(500)
+                print("You paid ")
                 won = True
                 break
             userInput = None

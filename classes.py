@@ -5,15 +5,41 @@ import time
 import os
 
 clear = lambda: os.system('cls')
-
 class Player: 
     def __init__(self, pokemon, backpack): 
         self.pokemon = pokemon 
         self.backpack = backpack 
-        for p in pokemon:
-            if p.fainted is False:
-                self.activePokemon = p
-                break
+        self.money = 0
+        if self.pokemon[0]:
+            for p in pokemon:
+                if p.fainted is False:
+                    self.activePokemon = p
+                    break
+        else:
+            self.activePokemon = None
+    
+
+    def setActivePokemon(self):
+        if self.pokemon[0]:
+            for p in self.pokemon:
+                if p.fainted is False:
+                    self.activePokemon = p
+                    break
+        else:
+            self.activePokeon = None
+
+    def takeMoney(self, amount):
+        self.money -= amount
+        if self.money < 0:
+            self.money = 0
+            print("You paid all your money to the winner...")
+        print("You paid $" + str(amount) + " to the winner...")
+    
+    def giveMoney(self, amount):
+        self.money += amount
+        print("You were given $500.")
+        time.sleep(2)
+        clear()
  
 class Backpack:
     def __init__(self, items):
@@ -25,6 +51,9 @@ class Backpack:
     def useItem(self, index, user):
         self.items[index].use(user)
         del self.items[index]
+
+    def addItem(self, item):
+        self.items.append(item)
 
 class Item:
     def __init__(self, name):
@@ -419,7 +448,7 @@ class Type:
     
     def __eq__(self, other):
         if other and self:
-            return self.typeName is other.typeName
+            return self.typeName == other.typeName
         else:
             return False
     
