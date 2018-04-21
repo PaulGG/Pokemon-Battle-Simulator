@@ -112,10 +112,11 @@ def getMoveInput(num):
         print("That isn't a valid type.")
         time.sleep(2)
         clear()
-    dmgType = getTextInput("Please enter if this is a physical or special move damage type. ")
-    accuracy = getInputWithConstraints("Please enter an accuracy value (10 to 100) ", True, None, 10, 100)
-    damage = getInputWithConstraints("Please enter a damage value (50 to 150) ", None, True, 50, 150)
-    PP = getInputWithConstraints("Please enter the power point (PP) value (5 to 50) ", True, None, 5, 50)
+        # getInputWithConstraints(message, exitable, options=None, min=None, max=None, double=None)
+    dmgType = getTextInput("Please enter if this is a physical or special move damage type. (~ for exit) ")
+    accuracy = getInputWithConstraints("Please enter an accuracy value (10 to 100) (~ for exit) ", True, None, 10, 100)
+    damage = getInputWithConstraints("Please enter a damage value (50 to 150) (~ for exit) ", True, None, 50, 150)
+    PP = getInputWithConstraints("Please enter the power point (PP) value (5 to 50) (~ for exit) ", True, None, 5, 50)
     return Move(name, damage, accuracy, dmgType, pType, PP)
 
 def getMovesInput():
