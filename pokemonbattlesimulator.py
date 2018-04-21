@@ -10,8 +10,13 @@ import sys
 import pygame
 
 clear = lambda: os.system('cls')
+pygame.mixer.init(48000, -16, 1, 1024)
+ss = pygame.mixer.Sound("select_sound_16.wav")
+#pygame.mixer.init()
 
-selectSound = lambda: winsound.PlaySound("select_sound.wav", winsound.SND_ASYNC | winsound.SND_FILENAME)
+selectSound = lambda: pygame.mixer.Sound.play(ss)
+    #pygame.mixer.Sound.play() #lambda: winsound.PlaySound("select_sound.wav", winsound.SND_ASYNC | winsound.SND_FILENAME)
+
 
 def readData(filename, defaultData):
     if not os.path.exists(filename):
@@ -356,13 +361,17 @@ def optionEight():
             usrIn2 = getInputWithConstraints("Please select a value between 0.0 and 1.0. (~ to exit) ", True, None, 0.0, 1.0, True)
             gameVolume = usrIn2
             pygame.mixer.music.set_volume(gameVolume)
+            ss.set_volume(gameVolume)
+            # SET OTHER EFFECTS TOO!
             writeData("game_volume.pkl", gameVolume)
     elif usrIn is 2:
         if muted:
             pygame.mixer.music.set_volume(gameVolume)
+            ss.set_volume(gameVolume)
             muted = False
         else:
             pygame.mixer.music.set_volume(0.0)
+            ss.set_volume(0.0)
             muted = True
         writeData("game_muted.pkl", muted)
     elif usrIn is 3:
@@ -424,7 +433,6 @@ def main():
     global muted
     clear()
     print("Welcome to Pokemon!")
-    pygame.mixer.init()
     pygame.mixer.music.load("main_theme.wav")
     pygame.mixer.music.play(loops=-1)
     if muted:
