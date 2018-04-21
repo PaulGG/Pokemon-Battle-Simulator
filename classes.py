@@ -477,7 +477,10 @@ class Type:
     
     def __eq__(self, other):
         if other and self:
-            return self.typeName == other.typeName
+            if isinstance(other, Type):
+                return self.typeName == other.typeName
+            else:
+                return False
         else:
             return False
     
