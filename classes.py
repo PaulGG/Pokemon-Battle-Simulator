@@ -15,6 +15,9 @@ superEffective = pygame.mixer.Sound("sounds/super_effective.wav")
 useItemSound = pygame.mixer.Sound("sounds/use_item.wav")
 buyItem = pygame.mixer.Sound("sounds/bought_item.wav")
 
+def sleep():
+    time.sleep(2)
+
 def playSound(sound):
     pygame.mixer.Sound.play(sound)
 
@@ -51,7 +54,7 @@ class Player:
     def giveMoney(self, amount):
         self.money += amount
         print("You were given $" + str(amount) + ".")
-        time.sleep(2)
+        sleep()
         clear()
 
     def getMoney(self):
@@ -87,11 +90,11 @@ class Item:
             player.backpack.addItem(copy.deepcopy(self))
             playSound(buyItem)
             print("You purchased the " + self.name + ".")
-            time.sleep(2)
+            sleep()
             clear()
         else:
             print("You do not have enough money to afford the " + self.name + "!")
-            time.sleep(2)
+            sleep()
             clear()
 
 class RevivalItem(Item):
@@ -128,9 +131,9 @@ class HealingItem(Item):
         else:
             user.hp += self.healthValue
         print("You used the " + self.name + ".")
-        time.sleep(2)
+        sleep()
         print("Restored " + user.name + "'s HP to " + str(user.hp) + ".")
-        time.sleep(2)
+        sleep()
         clear()
     
 class FullRestore(HealingItem):
@@ -450,7 +453,7 @@ class Move:
     def use(self, attacker, defender, player, wild):
             if self.pp <= 0:
                 print("You don't have enough PP to use that move!")
-                time.sleep(2)
+                sleep()
                 clear()
             else:
                 self.pp -= 1

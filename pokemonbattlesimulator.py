@@ -13,9 +13,6 @@ ss = pygame.mixer.Sound("sounds/select_sound.wav")
 
 selectSound = lambda: pygame.mixer.Sound.play(ss)
 
-def sleep():
-    sleep()
-
 def readData(filename, defaultData):
     if not os.path.exists(filename):
         open(filename, "w")
