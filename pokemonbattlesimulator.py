@@ -95,7 +95,10 @@ def getMoveInput(num):
                     print("Invalid input!")
                     sleep()
                     clear()
-    name = getTextInput("Please enter the name of move " + str(num) + ". ")
+    name = getTextInput("Please enter the name of move " + str(num) + ". (~ to exit) ")
+    if name == "~": 
+        clear()
+        return "~"
     move = movesDatabase.get(name.lower())
     if move:
         print("This move already exists in the database.")
@@ -103,7 +106,10 @@ def getMoveInput(num):
         clear()
         return move
     while True:
-        upType = getTextInput("Please enter the Pokemon type of this move. ")
+        upType = getTextInput("Please enter the Pokemon type of this move. (~ to exit) ")
+        if upType == "~": 
+            clear()
+            return "~"
         if types.get(upType):
             pType = types.get(upType)
             break
@@ -112,9 +118,21 @@ def getMoveInput(num):
         clear()
         # getInputWithConstraints(message, exitable, options=None, min=None, max=None, double=None)
     dmgType = getTextInput("Please enter if this is a physical or special move damage type. (~ for exit) ")
+    if dmgType == "~": 
+        clear()
+        return "~"
     accuracy = getInputWithConstraints("Please enter an accuracy value (10 to 100) (~ for exit) ", True, None, 10, 100)
+    if accuracy == "~": 
+        clear()
+        return "~"
     damage = getInputWithConstraints("Please enter a damage value (50 to 150) (~ for exit) ", True, None, 50, 150)
+    if damage == "~": 
+        clear()
+        return "~"
     PP = getInputWithConstraints("Please enter the power point (PP) value (5 to 50) (~ for exit) ", True, None, 5, 50)
+    if PP == "~": 
+        clear()
+        return "~"
     return Move(name, damage, accuracy, dmgType, pType, PP)
 
 def getMovesInput():
@@ -318,6 +336,9 @@ def optionFour():
 
 def optionFive():
     move = getMoveInput(1)
+    if not isinstance(move, Move):
+        clear()
+        return
     movesDatabase.update({move.name.lower(): move})
     writeData("moves_data.pkl", movesDatabase)
     clear()
@@ -493,7 +514,6 @@ for i in range(0, 6):
 
 #enemy = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], None)
 enemy.setActivePokemon()
-
 
 def orderDeterminer(playerPokemon, enemyPokemon):
     # Order is random if both pokemon's speed stats are identical.
