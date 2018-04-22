@@ -13,6 +13,9 @@ ss = pygame.mixer.Sound("sounds/select_sound.wav")
 
 selectSound = lambda: pygame.mixer.Sound.play(ss)
 
+def sleep():
+    sleep()
+
 def readData(filename, defaultData):
     if not os.path.exists(filename):
         open(filename, "w")
@@ -48,7 +51,7 @@ def getTextInput(message):
         except ValueError:
             clear()
             print("Invalid input!")
-            time.sleep(2)
+            sleep()
             clear()
 
 def getInputWithConstraints(message, exitable, options=None, min=None, max=None, double=None):
@@ -74,7 +77,7 @@ def getInputWithConstraints(message, exitable, options=None, min=None, max=None,
         except ValueError:
             clear()
             print("Invalid input!")
-            time.sleep(2)
+            sleep()
             clear()
 
 def getMoveInput(num):
@@ -93,13 +96,13 @@ def getMoveInput(num):
                 except ValueError:
                     clear()
                     print("Invalid input!")
-                    time.sleep(2)
+                    sleep()
                     clear()
     name = getTextInput("Please enter the name of move " + str(num) + ". ")
     move = movesDatabase.get(name.lower())
     if move:
         print("This move already exists in the database.")
-        time.sleep(2)
+        sleep()
         clear()
         return move
     while True:
@@ -108,7 +111,7 @@ def getMoveInput(num):
             pType = types.get(upType)
             break
         print("That isn't a valid type.")
-        time.sleep(2)
+        sleep()
         clear()
         # getInputWithConstraints(message, exitable, options=None, min=None, max=None, double=None)
     dmgType = getTextInput("Please enter if this is a physical or special move damage type. (~ for exit) ")
@@ -143,14 +146,14 @@ def typeInput(msg, prim):
             return None
         elif usrIn.lower() == "none":
             print("You must have a primary type. ")
-            time.sleep(2)
+            sleep()
             clear()
             continue
         usrType = types.get(usrIn.lower())
         if usrType:
             return usrType
         print("Type not recognized.")
-        time.sleep(2)
+        sleep()
         clear()
 
 def optionTwo():
@@ -174,7 +177,7 @@ def optionTwo():
     pygame.mixer.music.play(loops=-1)
     #print("TODO")
     print("Welcome to the Pokemart.")
-    time.sleep(2)
+    sleep()
     clear()
     options = ["Current Money Balance: $" + str(player.getMoney()), "-----------------------------", "1. Potion - restores 20 HP. $300", "2. Super Potion - restores 60 HP. $700", "3. Hyper Potion - restores 200 HP. $1200", 
     "4. Max Potion - restores max HP. $2500", "5. Full Restore - restores max HP and clears status effects. $3000", "6. Revive - heals a fainted Pokemon halfway. $1500", 
@@ -194,14 +197,14 @@ def optionThree():
     print("It is advised that you take legitimate pokemon from the original game and put them in.")
     print("Don't make ridiculously overpowered/underpowred Pokemon! Normally pokemon have base stats between 50-120.")
     print("Enemies will be randomly assigned pokemon in the save game. If you make an overpowered pokemon, then the enemy might get it!")
-    time.sleep(2)
+    sleep()
     clear()
     name = getTextInput("Please enter the name of the pokemon that you would like to create. (~ to exit) ")
     if name == "~": return
     newPokemon = pokemonDatabase.get(name.lower())
     if newPokemon:
         print("This pokemon is already in the database.")
-        time.sleep(2)
+        sleep()
         clear()
         return
     hpStat = getInputWithConstraints("Please enter the HP stat. (between 1-255) (~ to exit) ", True, None, 1, 255)
@@ -283,7 +286,7 @@ def printPokemonWithEmptySlots(pokemon, goBack):
 # CREATE POKEMON TEAM
 def optionFour():
     #print("TODO")
-    #time.sleep(2)
+    #sleep()
     clear()
     # print user current team\
     while True:
@@ -312,7 +315,7 @@ def optionFour():
             return
         else:
             print("That pokemon was not found in the database.")
-            time.sleep(2)
+            sleep()
             clear()
     writeData("player_data.pkl", player)
 
@@ -348,7 +351,7 @@ def optionEight():
     if usrIn is 1:
         if muted:
             print("Cannot change volume because game is muted. Please unmute in settings.")
-            time.sleep(2)
+            sleep()
             clear()
         else:
             usrIn2 = getInputWithConstraints("Please select a value between 0.0 and 1.0. (~ to exit) ", True, None, 0.0, 1.0, True)
@@ -373,12 +376,12 @@ def optionEight():
 def optionNine():
     clear()
     print("Goodbye!")
-    time.sleep(2)
+    sleep()
 
 def invalid():
     clear()
     print("That option does not exist!")
-    time.sleep(2)
+    sleep()
     clear()
 
 def main_menu_chooser(args, closing):
@@ -402,7 +405,7 @@ def main_menu_chooser(args, closing):
 def startBattle():
     clear()
     print("Starting battle...")
-    time.sleep(2)
+    sleep()
     clear()
     playGame()
 
@@ -590,7 +593,7 @@ def determineDead(playerPokemon, enemyPokemon, wild):
             print("The enemy's " + enemy.activePokemon.name + " fainted!")
         else: 
             print("The wild " + enemyPokemon.name + " fainted!" )
-        time.sleep(2)
+        sleep()
         for p in enemy.pokemon:
             if p:
                 if p.fainted is False:
@@ -605,14 +608,14 @@ def determineDead(playerPokemon, enemyPokemon, wild):
             won = True
         else:
             print("The enemy sent out " + enemy.activePokemon.name + "!")
-            time.sleep(2)
+            sleep()
             clear()
         return True
 
     # Determine if player pokemon is dead and out of pokemon.
     if player.activePokemon.fainted:
         print(player.activePokemon.name + " fainted!")
-        time.sleep(2)
+        sleep()
         clear()
         while True:
             if not checkForAlivePokemon(player):
@@ -630,7 +633,7 @@ def determineDead(playerPokemon, enemyPokemon, wild):
                     break
                 except ValueError:
                     print("Invalid Input!")
-                    time.sleep(2)
+                    sleep()
                     clear()
 
             select = player.pokemon[userInput - 1]
@@ -638,12 +641,12 @@ def determineDead(playerPokemon, enemyPokemon, wild):
                 player.activePokemon = select
                 clear()
                 print("Go! " + player.activePokemon.name + "!")
-                time.sleep(2)
+                sleep()
                 clear()
                 return True
             else:
                 print("You cannot select a fainted pokemon!")
-                time.sleep(2)
+                sleep()
                 clear()
         
         return False
@@ -726,7 +729,7 @@ def playGame():
                         break
                 except ValueError:
                     print("Invalid input!")
-                    time.sleep(2)
+                    sleep()
                     clear()
 
         # TODO: refactor if possible
@@ -768,11 +771,11 @@ def playGame():
                                 break
                             elif select.fainted and not isinstance(player.backpack.items[userInput - 1, RevivalItem]):
                                 print("You cannot use a healing item on a fainted pokemon!")
-                                time.sleep(2)
+                                sleep()
                                 clear()
                             else:
                                 print("You cannot use a revive item on a pokemon that is alive!")
-                                time.sleep(2)
+                                sleep()
                                 clear()
                         if not breakout2:
                             enemyAttack(player.activePokemon, enemy.activePokemon)
@@ -782,7 +785,7 @@ def playGame():
                         clear()
                 except ValueError:
                     print("Invalid input!")
-                    time.sleep(2)
+                    sleep()
                     clear()
 
         # TODO: refactor if possible
@@ -803,21 +806,21 @@ def playGame():
                         if select.fainted is False and select is not player.activePokemon:
                             player.activePokemon = select
                             print("Go! " + player.activePokemon.name + "!")
-                            time.sleep(2)
+                            sleep()
                             clear()
                             enemyAttack(player.activePokemon, enemy.activePokemon)
                             breakout = True
                         elif select is player.activePokemon:
                             print("You cannot send out the pokemon that is currently in battle!")
-                            time.sleep(2)
+                            sleep()
                             clear()
                         else:
                             print("You cannot select a fainted pokemon!")
-                            time.sleep(2)
+                            sleep()
                             clear()
                 except ValueError:
                     print("Invalid Input!")
-                    time.sleep(2)
+                    sleep()
                     clear()
 
         def battlePicker(args):

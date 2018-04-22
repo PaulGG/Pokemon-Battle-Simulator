@@ -127,7 +127,6 @@ class HealingItem(Item):
             user.hp = user.maxHp
         else:
             user.hp += self.healthValue
-        useItem()
         print("You used the " + self.name + ".")
         time.sleep(2)
         print("Restored " + user.name + "'s HP to " + str(user.hp) + ".")
