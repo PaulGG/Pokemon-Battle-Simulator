@@ -5,18 +5,13 @@ from pokemontypes import flying, poison, ground, rock, fire, grass, dragon, type
 import os
 import time
 import pickle
-import winsound
 import sys
 import pygame
 
 clear = lambda: os.system('cls')
-pygame.mixer.init(48000, -16, 1, 1024)
-ss = pygame.mixer.Sound("select_sound_16.wav")
-#pygame.mixer.init()
+ss = pygame.mixer.Sound("sounds/select_sound.wav")
 
 selectSound = lambda: pygame.mixer.Sound.play(ss)
-    #pygame.mixer.Sound.play() #lambda: winsound.PlaySound("select_sound.wav", winsound.SND_ASYNC | winsound.SND_FILENAME)
-
 
 def readData(filename, defaultData):
     if not os.path.exists(filename):
@@ -27,8 +22,6 @@ def readData(filename, defaultData):
         with open(filename, "rb") as inpuut:
             return pickle.load(inpuut)
     except EOFError:
-        #with open(filename, "wb") as output:
-         #   pickle.dump(defaultData, output, pickle.HIGHEST_PROTOCOL)
         open(filename, "w")
         with open(filename, "wb") as output:
             pickle.dump(defaultData, output, pickle.HIGHEST_PROTOCOL)
@@ -177,13 +170,13 @@ def optionTwo():
             switcher.get(args, invalid)().buyItem(player)
             return True
 
-    pygame.mixer.music.load("shop_theme.wav")
+    pygame.mixer.music.load("sounds/shop_theme.wav")
     pygame.mixer.music.play(loops=-1)
     #print("TODO")
     print("Welcome to the Pokemart.")
     time.sleep(2)
     clear()
-    options = ["1. Potion - restores 20 HP. $300", "2. Super Potion - restores 60 HP. $700", "3. Hyper Potion - restores 200 HP. $1200", 
+    options = ["Current Money Balance: $" + str(player.getMoney()), "-----------------------------", "1. Potion - restores 20 HP. $300", "2. Super Potion - restores 60 HP. $700", "3. Hyper Potion - restores 200 HP. $1200", 
     "4. Max Potion - restores max HP. $2500", "5. Full Restore - restores max HP and clears status effects. $3000", "6. Revive - heals a fainted Pokemon halfway. $1500", 
     "7. Max Revive - heals a fainted pokemon completely. $2000", "8. Go back"]
     myBool = True
@@ -191,7 +184,7 @@ def optionTwo():
         usrIn = getInputWithConstraints("Please select an item you would like to purchase. ", False, options, 1, 8)
         myBool = itemChooser(usrIn)
         writeData("player_data.pkl", player)
-    pygame.mixer.music.load("main_theme.wav")
+    pygame.mixer.music.load("sounds/main_theme.wav")
     pygame.mixer.music.play(loops=-1)
 
 def optionThree():
@@ -423,7 +416,7 @@ def battleAgain():
             else:
                 clear()
                 pygame.mixer.music.stop()
-                pygame.mixer.music.load("main_theme.wav")
+                pygame.mixer.music.load("sounds/main_theme.wav")
                 pygame.mixer.music.play(loops=-1)
                 break
         except: TypeError
@@ -433,7 +426,7 @@ def main():
     global muted
     clear()
     print("Welcome to Pokemon!")
-    pygame.mixer.music.load("main_theme.wav")
+    pygame.mixer.music.load("sounds/main_theme.wav")
     pygame.mixer.music.play(loops=-1)
     if muted:
         pygame.mixer.music.set_volume(0.0)
@@ -498,7 +491,7 @@ for i in range(0, 6):
     enemy.pokemon[i] = copy.deepcopy(pokemonDatabase.get(get_nth_key(pokemonDatabase, sel)))
 #enemy.activePokemon = enemy.pokemon[0]
 
-enemy = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], None)
+#enemy = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], None)
 enemy.setActivePokemon()
 
 
@@ -658,7 +651,7 @@ def determineDead(playerPokemon, enemyPokemon, wild):
 #TODO: refactor
 def playGame():
     pygame.mixer.music.stop()
-    pygame.mixer.music.load("battle_music.wav")
+    pygame.mixer.music.load("sounds/battle_music.wav")
     pygame.mixer.music.play(loops=-1)
     global won
     won = False

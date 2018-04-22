@@ -4,14 +4,19 @@ import math
 import time
 import os
 import copy
-import winsound
+#import winsound
+import pygame
 
+pygame.mixer.init(48000, -16, 1, 1024)
 clear = lambda: os.system('cls')
-notEffective = lambda: winsound.PlaySound("not_effective.wav", winsound.SND_ASYNC | winsound.SND_FILENAME)
-normalEffective = lambda: winsound.PlaySound("normal_effective.wav", winsound.SND_ASYNC | winsound.SND_FILENAME)
-superEffective = lambda: winsound.PlaySound("super_effective.wav", winsound.SND_ASYNC | winsound.SND_FILENAME)
-useItem = lambda: winsound.PlaySound("use_item.wav", winsound.SND_ASYNC | winsound.SND_FILENAME)
-buyItem = lambda: winsound.PlaySound("bought_item.wav", winsound.SND_ASYNC | winsound.SND_FILENAME)
+notEffective = pygame.mixer.Sound("sounds/not_effective.wav")
+normalEffective = pygame.mixer.Sound("sounds/normal_effective.wav")
+superEffective = pygame.mixer.Sound("sounds/super_effective.wav")
+useItemSound = pygame.mixer.Sound("sounds/use_item.wav")
+buyItem = pygame.mixer.Sound("sounds/bought_item.wav")
+
+def playSound(sound):
+    pygame.mixer.Sound.play(sound)
 
 class Player: 
     def __init__(self, pokemon, backpack): 
@@ -80,7 +85,7 @@ class Item:
         if(player.money - self.price >= 0):
             player.money -= self.price
             player.backpack.addItem(copy.deepcopy(self))
-            buyItem()
+            playSound(buyItem)
             print("You purchased the " + self.name + ".")
             time.sleep(2)
             clear()
@@ -98,7 +103,7 @@ class RevivalItem(Item):
         hpToRestore = user.maxHp * self.reviveLevel
         user.hp += hpToRestore
         user.fainted = False
-        useItem()
+        playSound(useItemSound)
         print("You used the " + self.name + ".")
         print("Revived " + user.name + ".")
 
@@ -410,19 +415,19 @@ class Move:
             print("It does not affect " + defender.name + "...")
             time.sleep(delay)
         elif effectiveness is 1:
-            normalEffective()
+            playSound(normalEffective)
             time.sleep(delay)
             checkCritical(critical, effectiveness)
             print("It had normal effectiveness.")
             time.sleep(delay)
         elif effectiveness > 1:
-            superEffective()
+            playSound(superEffective)
             time.sleep(delay)
             checkCritical(critical, effectiveness)
             print("It's super effective!")
             time.sleep(delay)
         elif effectiveness < 1:
-            notEffective()
+            playSound(notEffective)
             time.sleep(delay)
             checkCritical(critical, effectiveness)
             print("It's not very effective...")
