@@ -34,7 +34,6 @@ def optionOne():
     startBattle()
     battleAgain()
 
-#TODO: add boolean for confirm
 def getTextInput(message):
     while True:
         try:
@@ -190,7 +189,6 @@ def optionTwo():
 
     pygame.mixer.music.load("sounds/shop_theme.wav")
     pygame.mixer.music.play(loops=-1)
-    #print("TODO")
     print("Welcome to the Pokemart.")
     sleep()
     clear()
@@ -298,12 +296,9 @@ def printPokemonWithEmptySlots(pokemon, goBack):
         i += 1
         print(str(i) + ". Go Back")
 
-# CREATE POKEMON TEAM
 def optionFour():
-    #print("TODO")
-    #sleep()
     clear()
-    # print user current team\
+    # print user current team
     while True:
         print("Here are the pokemon currently on your team: ")
         printPokemonWithEmptySlots(player.pokemon, False)
@@ -499,7 +494,6 @@ movesDatabase = readData("moves_data.pkl", defaultMovesDatabase)
 pokemonDatabase = readData("pokemon_data.pkl", defaultPokemonDatabase)
 writeData("moves_data.pkl", movesDatabase)
 writeData("pokemon_data.pkl", pokemonDatabase)
-# TODO: save player's team to database
 defaultPlayer = Player([copy.deepcopy(venusaur), copy.deepcopy(charizard), None, None, None, None], Backpack([]))
 player = readData("player_data.pkl", defaultPlayer)
 writeData("player_data.pkl", player)
@@ -541,7 +535,6 @@ def playerAttack(moveIndex, playerPokemon, enemyPokemon):
 
     chooser(moveIndex)
 
-# TODO: switch
 def enemyAttack(playerPokemon, enemyPokemon):
     noMove1 = enemyPokemon.moves.move1.pp <= 0
     noMove2 = enemyPokemon.moves.move2.pp <= 0
@@ -602,7 +595,6 @@ def getActivePokemon(playerPokemon):
             activePokemons.append(pokemon)
     return activePokemons
 
-# TODO: refactor
 def determineDead(playerPokemon, enemyPokemon, wild):
     # Determine if enemy pokemon is dead and out of pokemon.
     if enemyPokemon.fainted:
@@ -668,7 +660,6 @@ def determineDead(playerPokemon, enemyPokemon, wild):
         
         return False
 
-#TODO: refactor
 def playGame():
     pygame.mixer.music.stop()
     pygame.mixer.music.load("sounds/battle_music.wav")
@@ -749,7 +740,6 @@ def playGame():
                     sleep()
                     clear()
 
-        # TODO: refactor if possible
         def battleOption2():
             breakout = False
             options = []
@@ -805,7 +795,6 @@ def playGame():
                     sleep()
                     clear()
 
-        # TODO: refactor if possible
         def battleOption3():
             breakout = False
             while not breakout:
