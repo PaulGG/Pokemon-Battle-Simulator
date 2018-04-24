@@ -136,13 +136,21 @@ def getMoveInput(num):
 
 def getMovesInput():
     move1 = getMoveInput(1)
+    if move1 == "~":
+        return "~"
     movesDatabase.update({move1.name: move1})
     move2 = getMoveInput(2)
+    if move2 == "~":
+        return "~"
     movesDatabase.update({move2.name: move2})
     move3 = getMoveInput(3)
+    if move3 == "~":
+        return "~"
     if move3:
         movesDatabase.update({move3.name: move3})
         move4 = getMoveInput(4)
+        if move4 == "~":
+            return "~"
         if move4:
             movesDatabase.update({move4.name: move4})
         else:
@@ -352,15 +360,21 @@ def optionSeven():
 
 defaultGameVolume = 1
 defaultMuted = False
+defaultSelectVolume = 1
 
 gameVolume = readData("game_volume.pkl", defaultGameVolume)
 muted = readData("game_muted.pkl", defaultMuted)
+selectVolume = readData("game_selectVolume.pkl", defaultSelectVolume)
+
+if muted:
+    ss.set_volume(0.0)
 
 def optionEight():
     global muted
     global gameVolume
-    options = ["1. Volume Strength", "2. Mute/Unmute Volume", "3. Back to Main Menu"]
-    usrIn = getInputWithConstraints("Please select a setting. ", False, options, 1, 3)
+    global selectVolume
+    options = ["1. Volume Strength", "2. Sound Effects Volume Strength", "3. Mute/Unmute Volume", "4. Back to Main Menu"]
+    usrIn = getInputWithConstraints("Please select a setting. ", False, options, 1, 4)
     if usrIn is 1:
         if muted:
             print("Cannot change volume because game is muted. Please unmute in settings.")
@@ -370,10 +384,20 @@ def optionEight():
             usrIn2 = getInputWithConstraints("Please select a value between 0.0 and 1.0. (~ to exit) ", True, None, 0.0, 1.0, True)
             gameVolume = usrIn2
             pygame.mixer.music.set_volume(gameVolume)
-            ss.set_volume(gameVolume)
             # SET OTHER EFFECTS TOO!
             writeData("game_volume.pkl", gameVolume)
     elif usrIn is 2:
+        if muted:
+            print("Cannot change volume because game is muted. Please unmute in settings.")
+            sleep()
+            clear()
+        else:
+            usrIn2 = getInputWithConstraints("Please select a value between 0.0 and 1.0. (~ to exit) ", True, None, 0.0, 1.0, True)
+            selectVolume = usrIn2
+            ss.set_volume(selectVolume)
+            # SET OTHER EFFECTS TOO!
+            writeData("game_selectVolume.pkl", selectVolume)
+    elif usrIn is 3:
         if muted:
             pygame.mixer.music.set_volume(gameVolume)
             ss.set_volume(gameVolume)
@@ -383,7 +407,7 @@ def optionEight():
             ss.set_volume(0.0)
             muted = True
         writeData("game_muted.pkl", muted)
-    elif usrIn is 3:
+    elif usrIn is 4:
         return
 
 def optionNine():
