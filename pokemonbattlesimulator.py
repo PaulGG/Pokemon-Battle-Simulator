@@ -7,6 +7,19 @@ import time
 import pickle
 import sys
 import pygame
+import sys
+
+#selectSoundWav = resource_path("sounds/select_sound.wav")
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 clear = lambda: os.system('cls')
 ss = pygame.mixer.Sound("sounds/select_sound.wav")
