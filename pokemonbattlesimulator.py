@@ -62,6 +62,7 @@ def getInputWithConstraints(message, exitable, options=None, min=None, max=None,
             usrInput = input(message)
             if usrInput == "~" and exitable: 
                 clear()
+                selectSound()
                 return usrInput
             if double:
                 usrInput = float(usrInput)
@@ -203,11 +204,11 @@ def optionTwo():
     print("Welcome to the Pokemart.")
     sleep()
     clear()
-    options = ["Current Money Balance: $" + str(player.getMoney()), "-----------------------------", "1. Potion - restores 20 HP. $300", "2. Super Potion - restores 60 HP. $700", "3. Hyper Potion - restores 200 HP. $1200", 
-    "4. Max Potion - restores max HP. $2500", "5. Full Restore - restores max HP and clears status effects. $3000", "6. Revive - heals a fainted Pokemon halfway. $1500", 
-    "7. Max Revive - heals a fainted pokemon completely. $2000", "8. Go back"]
     myBool = True
     while myBool:
+        options = ["Current Money Balance: $" + str(player.getMoney()), "-----------------------------", "1. Potion - restores 20 HP. $300", "2. Super Potion - restores 60 HP. $700", "3. Hyper Potion - restores 200 HP. $1200", 
+        "4. Max Potion - restores max HP. $2500", "5. Full Restore - restores max HP and clears status effects. $3000", "6. Revive - heals a fainted Pokemon halfway. $1500", 
+        "7. Max Revive - heals a fainted pokemon completely. $2000", "8. Go back"]
         usrIn = getInputWithConstraints("Please select an item you would like to purchase. ", False, options, 1, 8)
         myBool = itemChooser(usrIn)
         writeData("player_data.pkl", player)
@@ -286,7 +287,7 @@ def optionThree():
     passive = None#input("Please enter your pokemon's passive.")
     healthStatus = None
     itemHeld = None
-    level = getInputWithConstraints("Please enter the level for the Pokemon. (1 to 100) (~ to exit)", True, None, 1, 100)
+    level = getInputWithConstraints("Please enter the level for the Pokemon. (1 to 100) (~ to exit) ", True, None, 1, 100)
     if level == "~": 
         clear()
         return
@@ -385,6 +386,8 @@ def optionEight():
             clear()
         else:
             usrIn2 = getInputWithConstraints("Please select a value between 0.0 and 1.0. (~ to exit) ", True, None, 0.0, 1.0, True)
+            if usrIn2 == "~":
+                return
             gameVolume = usrIn2
             pygame.mixer.music.set_volume(gameVolume)
             # SET OTHER EFFECTS TOO!
@@ -396,18 +399,36 @@ def optionEight():
             clear()
         else:
             usrIn2 = getInputWithConstraints("Please select a value between 0.0 and 1.0. (~ to exit) ", True, None, 0.0, 1.0, True)
+            if usrIn2 == "~":
+                return
             selectVolume = usrIn2
             ss.set_volume(selectVolume)
             # SET OTHER EFFECTS TOO!
+            buyItem.set_volume(selectVolume)
+            useItemSound.set_volume(selectVolume)
+            notEffective.set_volume(selectVolume)
+            normalEffective.set_volume(selectVolume)
+            superEffective.set_volume(selectVolume)
+
             writeData("game_selectVolume.pkl", selectVolume)
     elif usrIn is 3:
         if muted:
             pygame.mixer.music.set_volume(gameVolume)
-            ss.set_volume(gameVolume)
+            ss.set_volume(selectVolume)
+            buyItem.set_volume(selectVolume)
+            useItemSound.set_volume(selectVolume)
+            notEffective.set_volume(selectVolume)
+            normalEffective.set_volume(selectVolume)
+            superEffective.set_volume(selectVolume)
             muted = False
         else:
             pygame.mixer.music.set_volume(0.0)
             ss.set_volume(0.0)
+            buyItem.set_volume(0.0)
+            useItemSound.set_volume(0.0)
+            notEffective.set_volume(0.0)
+            normalEffective.set_volume(0.0)
+            superEffective.set_volume(0.0)
             muted = True
         writeData("game_muted.pkl", muted)
     elif usrIn is 4:
@@ -527,10 +548,14 @@ writeData("player_data.pkl", player)
 
 enemy = Player([None, None, None, None, None, None], None)
 
-for i in range(0, 6):
-    cap = len(pokemonDatabase) - 1
-    sel = round(random.random() * cap)
-    enemy.pokemon[i] = copy.deepcopy(pokemonDatabase.get(get_nth_key(pokemonDatabase, sel)))
+def randomizeEnemyTeam():
+    global enemy
+    for i in range(0, 6):
+        cap = len(pokemonDatabase) - 1
+        sel = round(random.random() * cap)
+        enemy.pokemon[i] = copy.deepcopy(pokemonDatabase.get(get_nth_key(pokemonDatabase, sel)))
+
+randomizeEnemyTeam()
 #enemy.activePokemon = enemy.pokemon[0]
 
 #enemy = Player([copy.deepcopy(charizard), copy.deepcopy(venusaur), None, None, None, None], None)
@@ -554,10 +579,14 @@ def playerAttack(moveIndex, playerPokemon, enemyPokemon):
     def chooser(args):
         switcher = {
             1: playerPokemon.moves.useMove1().use,
-            2: playerPokemon.moves.useMove2().use,
-            3: playerPokemon.moves.useMove3().use,
-            4: playerPokemon.moves.useMove4().use
+            2: playerPokemon.moves.useMove2().use
         }
+
+        if playerPokemon.moves.useMove3():
+            switcher.update({3: playerPokemon.moves.useMove3().use})
+            if playerPokemon.moves.useMove4():
+                switcher.update({4: playerPokemon.moves.useMove4().use})
+
         return switcher.get(args)(playerPokemon, enemyPokemon, True, playerPokemon.wild)
 
     chooser(moveIndex)
@@ -565,8 +594,12 @@ def playerAttack(moveIndex, playerPokemon, enemyPokemon):
 def enemyAttack(playerPokemon, enemyPokemon):
     noMove1 = enemyPokemon.moves.move1.pp <= 0
     noMove2 = enemyPokemon.moves.move2.pp <= 0
-    noMove3 = enemyPokemon.moves.move3.pp <= 0
-    noMove4 = enemyPokemon.moves.move4.pp <= 0
+    noMove3 = True
+    noMove4 = True
+    if enemyPokemon.moves.move3:
+        noMove3 = enemyPokemon.moves.move3.pp <= 0
+        if enemyPokemon.moves.move4:
+            noMove4 = enemyPokemon.moves.move4.pp <= 0
 
     while True:
         rand = random.random()
@@ -694,6 +727,7 @@ def playGame():
     global won
     won = False
     resetPlayerPokemon(player)
+    randomizeEnemyTeam()
     resetPlayerPokemon(enemy)
     print("The enemy sends out " + enemy.activePokemon.name + ".")
     print("Go! " + player.activePokemon.name + "!")
