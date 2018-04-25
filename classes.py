@@ -9,17 +9,35 @@ import pygame
 
 pygame.mixer.init(48000, -16, 1, 1024)
 clear = lambda: os.system('cls')
-notEffective = pygame.mixer.Sound("sounds/not_effective.wav")
-normalEffective = pygame.mixer.Sound("sounds/normal_effective.wav")
-superEffective = pygame.mixer.Sound("sounds/super_effective.wav")
-useItemSound = pygame.mixer.Sound("sounds/use_item.wav")
-buyItem = pygame.mixer.Sound("sounds/bought_item.wav")
+try:
+    notEffective = pygame.mixer.Sound("sounds/not_effective.wav")
+except pygame.error:
+    notEffective = None
+try:
+    normalEffective = pygame.mixer.Sound("sounds/normal_effective.wav")
+except pygame.error:
+    normalEffective = None
+try:
+    superEffective = pygame.mixer.Sound("sounds/super_effective.wav")
+except pygame.error:
+    superEffective = None
+try:
+    useItemSound = pygame.mixer.Sound("sounds/use_item.wav")
+except pygame.error:
+    useItemSound = None
+try:
+    buyItem = pygame.mixer.Sound("sounds/bought_item.wav")
+except pygame.error:
+    buyItem = None
 
 def sleep():
     time.sleep(2)
 
 def playSound(sound):
-    pygame.mixer.Sound.play(sound)
+    try:
+        pygame.mixer.Sound.play(sound)
+    except:
+        None
 
 class Player: 
     def __init__(self, pokemon, backpack): 

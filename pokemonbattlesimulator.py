@@ -12,9 +12,19 @@ import sys
 #selectSoundWav = resource_path("sounds/select_sound.wav")
 
 clear = lambda: os.system('cls')
-ss = pygame.mixer.Sound("sounds/select_sound.wav")
+try:
+    ss = pygame.mixer.Sound("sounds/select_sound.wav")
+except pygame.error:
+    print("Warning: Sound Files Missing")
+    time.sleep(2)
+    clear()
+    ss = None
 
-selectSound = lambda: pygame.mixer.Sound.play(ss)
+def selectSound():
+    try:
+        pygame.mixer.Sound.play(ss)
+    except:
+        None
 
 def readData(filename, defaultData):
     if not os.path.exists(filename):
@@ -113,14 +123,14 @@ def getMoveInput(num):
         if upType == "~": 
             clear()
             return "~"
-        if types.get(upType):
-            pType = types.get(upType)
+        if types.get(upType.lower()):
+            pType = types.get(upType.lower())
             break
         print("That isn't a valid type.")
         sleep()
         clear()
         # getInputWithConstraints(message, exitable, options=None, min=None, max=None, double=None)
-    dmgType = getTextInput("Please enter if this is a physical or special move damage type. (~ for exit) ")
+    dmgType = getInputWithConstraints("Please enter if this is a physical or special move damage type. (~ for exit) ", True, ["1. Special", "2. Physical"], 1, 2)
     if dmgType == "~": 
         clear()
         return "~"
@@ -198,9 +208,11 @@ def optionTwo():
         else:
             switcher.get(args, invalid)().buyItem(player)
             return True
-
-    pygame.mixer.music.load("sounds/shop_theme.wav")
-    pygame.mixer.music.play(loops=-1)
+    try:
+        pygame.mixer.music.load("sounds/shop_theme.wav")
+        pygame.mixer.music.play(loops=-1)
+    except pygame.error:
+        None
     print("Welcome to the Pokemart.")
     sleep()
     clear()
@@ -212,9 +224,12 @@ def optionTwo():
         usrIn = getInputWithConstraints("Please select an item you would like to purchase. ", False, options, 1, 8)
         myBool = itemChooser(usrIn)
         writeData("player_data.pkl", player)
-    pygame.mixer.music.load("sounds/main_theme.wav")
-    pygame.mixer.music.play(loops=-1)
-
+    try:
+        pygame.mixer.music.load("sounds/main_theme.wav")
+        pygame.mixer.music.play(loops=-1)
+    except pygame.error:
+        None
+    
 def optionThree():
     clear()
     print("Create your own Pokemon here!")
@@ -222,8 +237,6 @@ def optionThree():
     print("It is advised that you take legitimate pokemon from the original game and put them in.")
     print("Don't make ridiculously overpowered/underpowred Pokemon! Normally pokemon have base stats between 50-120.")
     print("Enemies will be randomly assigned pokemon in the save game. If you make an overpowered pokemon, then the enemy might get it!")
-    sleep()
-    clear()
     name = getTextInput("Please enter the name of the pokemon that you would like to create. (~ to exit) ")
     if name == "~": return
     newPokemon = pokemonDatabase.get(name.lower())
@@ -371,7 +384,10 @@ muted = readData("game_muted.pkl", defaultMuted)
 selectVolume = readData("game_selectVolume.pkl", defaultSelectVolume)
 
 if muted:
-    ss.set_volume(0.0)
+    try:
+        ss.set_volume(0.0)
+    except AttributeError:
+        None
 
 def optionEight():
     global muted
@@ -402,33 +418,42 @@ def optionEight():
             if usrIn2 == "~":
                 return
             selectVolume = usrIn2
-            ss.set_volume(selectVolume)
-            # SET OTHER EFFECTS TOO!
-            buyItem.set_volume(selectVolume)
-            useItemSound.set_volume(selectVolume)
-            notEffective.set_volume(selectVolume)
-            normalEffective.set_volume(selectVolume)
-            superEffective.set_volume(selectVolume)
+            try:
+                ss.set_volume(selectVolume)
+                # SET OTHER EFFECTS TOO!
+                buyItem.set_volume(selectVolume)
+                useItemSound.set_volume(selectVolume)
+                notEffective.set_volume(selectVolume)
+                normalEffective.set_volume(selectVolume)
+                superEffective.set_volume(selectVolume)
+            except AttributeError:
+                None
 
             writeData("game_selectVolume.pkl", selectVolume)
     elif usrIn is 3:
         if muted:
             pygame.mixer.music.set_volume(gameVolume)
-            ss.set_volume(selectVolume)
-            buyItem.set_volume(selectVolume)
-            useItemSound.set_volume(selectVolume)
-            notEffective.set_volume(selectVolume)
-            normalEffective.set_volume(selectVolume)
-            superEffective.set_volume(selectVolume)
+            try:
+                ss.set_volume(selectVolume)
+                buyItem.set_volume(selectVolume)
+                useItemSound.set_volume(selectVolume)
+                notEffective.set_volume(selectVolume)
+                normalEffective.set_volume(selectVolume)
+                superEffective.set_volume(selectVolume)
+            except AttributeError:
+                None
             muted = False
         else:
             pygame.mixer.music.set_volume(0.0)
-            ss.set_volume(0.0)
-            buyItem.set_volume(0.0)
-            useItemSound.set_volume(0.0)
-            notEffective.set_volume(0.0)
-            normalEffective.set_volume(0.0)
-            superEffective.set_volume(0.0)
+            try:
+                ss.set_volume(0.0)
+                buyItem.set_volume(0.0)
+                useItemSound.set_volume(0.0)
+                notEffective.set_volume(0.0)
+                normalEffective.set_volume(0.0)
+                superEffective.set_volume(0.0)
+            except AttributeError:
+                None
             muted = True
         writeData("game_muted.pkl", muted)
     elif usrIn is 4:
@@ -480,8 +505,11 @@ def battleAgain():
             else:
                 clear()
                 pygame.mixer.music.stop()
-                pygame.mixer.music.load("sounds/main_theme.wav")
-                pygame.mixer.music.play(loops=-1)
+                try:
+                    pygame.mixer.music.load("sounds/main_theme.wav")
+                    pygame.mixer.music.play(loops=-1)
+                except pygame.error:
+                    None
                 break
         except: TypeError
 
@@ -490,8 +518,12 @@ def main():
     global muted
     clear()
     print("Welcome to Pokemon!")
-    pygame.mixer.music.load("sounds/main_theme.wav")
-    pygame.mixer.music.play(loops=-1)
+    try:
+        pygame.mixer.music.load("sounds/main_theme.wav")
+        pygame.mixer.music.play(loops=-1)
+    except pygame.error:
+        None
+    
     if muted:
         pygame.mixer.music.set_volume(0.0)
     else:
@@ -502,7 +534,7 @@ def main():
     while not closing:
         options = ["Current Money Balance: $" + str(player.getMoney()), "-----------------------------" ,"1. Battle", "2. Buy Items", "3. Create new Pokemon",
          "4. Create your Pokemon Team", "5. Create new Move", "6. Print Current Team", "7. Show Backpack Items", "8. Settings", "9. Close program.", "-----------------------------"]
-        userInput = getInputWithConstraints("Please select one of the following options. ", False, options)
+        userInput = getInputWithConstraints("Please select one of the above options. ", False, options)
         clear()
         closing = main_menu_chooser(userInput, closing)
              
@@ -722,8 +754,11 @@ def determineDead(playerPokemon, enemyPokemon, wild):
 
 def playGame():
     pygame.mixer.music.stop()
-    pygame.mixer.music.load("sounds/battle_music.wav")
-    pygame.mixer.music.play(loops=-1)
+    try:
+        pygame.mixer.music.load("sounds/battle_music.wav")
+        pygame.mixer.music.play(loops=-1)
+    except pygame.error:
+        None
     global won
     won = False
     resetPlayerPokemon(player)
