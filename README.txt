@@ -45,7 +45,7 @@ These all determine how much health the pokemon has (how much damage it CAN take
 its attack damage, its defense (how much damage it takes), the special variants of 
 those, and then speed (will player or enemy attack first?)
 
-Items are in the shop. The main categories are potions and revives. The more expensive the item is, the more
-it will heal you.
+Items are in the shop. The main categories are potions and revives. 
+The more expensive the item is, the more it will heal you.
 
 
