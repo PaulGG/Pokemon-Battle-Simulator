@@ -11,7 +11,14 @@ import sys
 
 #selectSoundWav = resource_path("sounds/select_sound.wav")
 
-clear = lambda: os.system('cls')
+#clear = lambda: os.system('cls')
+def clear():
+    print(os.name)
+    if os.name == "nt":
+        os.system('cls')
+    elif os.name == "posix" or os.name == "mac":
+        os.system("clear")
+
 try:
     ss = pygame.mixer.Sound("sounds/select_sound.wav")
 except pygame.error:
