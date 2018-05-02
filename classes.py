@@ -8,7 +8,11 @@ import copy
 import pygame
 
 pygame.mixer.init(48000, -16, 1, 1024)
-clear = lambda: os.system('cls')
+def clear():
+    if os.name == "nt":
+        os.system('cls')
+    elif os.name == "posix" or os.name == "mac":
+        os.system("clear")
 try:
     notEffective = pygame.mixer.Sound("sounds/not_effective.wav")
 except pygame.error:
@@ -387,7 +391,7 @@ class Move:
     
     def damageFunc(self, attacker, defender, player, wild):
         delay = 2
-        det = self.accuracy / 100
+        det = float(self.accuracy / 100.0)
         det2 = random.random()
         if det2 > det:
             if player:

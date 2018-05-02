@@ -13,7 +13,6 @@ import sys
 
 #clear = lambda: os.system('cls')
 def clear():
-    print(os.name)
     if os.name == "nt":
         os.system('cls')
     elif os.name == "posix" or os.name == "mac":
