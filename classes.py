@@ -4,7 +4,6 @@ import math
 import time
 import os
 import copy
-#import winsound
 import pygame
 
 pygame.mixer.init(48000, -16, 1, 1024)
@@ -185,7 +184,7 @@ class MaxPotion(HealingItem):
 class Pokemon:
     def __init__(self, name, hpStat, attackStat, defenseStat, spAttackStat, spDefenseStat, speedStat, level, moves, type1, type2, hpIV, 
         attackIV, defenseIV, spAttackIV, spDefenseIV, speedIV, hpEV, attackEV, defenseEV, spAttackEV, spDefenseEV, speedEV, nature, 
-        growthRate, passive, healthStatus, itemHeld, wild): 
+        growthRate, passive, itemHeld, wild): 
         self.name = name
         # all stats must be betweeen 1 and 255
         self.hpStat = hpStat
@@ -228,7 +227,7 @@ class Pokemon:
         self.passive = passive
 
         # health status is like burn, paralyzed, etc.
-        self.healthStatus = "healthStatus"
+        self.healthStatus = Normal(self)
 
         # item held....has effects
         self.itemHeld = itemHeld
@@ -250,6 +249,7 @@ class Pokemon:
 
         self.fainted = True if self.hp <= 0 else False
         self.wild = wild
+        self.cannotAttack = False
 
     def levelSetter(self, requiredXP):
         if self.xp >= requiredXP:
@@ -303,12 +303,150 @@ class Pokemon:
         else:
             requiredXP = ((5 * (self.level + 1) ** 3) / 4) - ((5 * (self.level) ** 3) / 4) 
             self.levelSetter(requiredXP)
+
+# How will these work in battle?
+# At the end of the player's turn, or right before the player's turn, the game will check to see if 
+# any status effects are present. If there is one, then we will need to see what specifically it is.
+# We will make a function in the main game file that will handle what occurrs when we need to parse 
+# what a status effect does. For example, Paralysis would make it so the user might not be able to attack.
+# It would also make the user's speed terrible. 
+
+# the game loop needs to get refactored in the way things are done before I can continue with status effects.
+class StatusEffect:
+    def __init__(self, name, victim):
+        self.name = name
+        self.victim = victim
     
+    @abc.abstractclassmethod
+    def effects(self, victim):
+        print("Please implement this!")
+
+class Normal(StatusEffect):
+    def __init__(self, victim):
+        StatusEffect.__init__(self, "normal", victim)
+
+    def effects(self, victim):
+        return True
+
+class Paralysis(StatusEffect):
+    def __init__(self, victim):
+        StatusEffect.__init__(self, "paralysis", victim)
+        self.victim.speed /= 2.0
+
+    def effects(self, victim):
+        rando = random.random()
+        if rando >= 0 and rando <= 0.25:
+            print(victim.name + " is paralyzed! It can't move!")
+            sleep()
+            clear()
+            return False
+        return True
+
+    def __del__(self):
+        self.victim.speed *= 2
+        self.victim.healthStatus = Normal(self.victim)
+
+class Frozen(StatusEffect):
+    def __init__(self):
+        StatusEffect.__init__(self, "frozen")
+
+    def effects(self, victim):
+        rando = random.random()
+        if rando >= 0 and rando <= .2:
+            print(victim.name + " thawed out!")
+            sleep()
+            clear()
+            return True
+        else:
+            print(victim.name + " is frozen!")
+            sleep()
+            clear()
+            return False
+
+class Confusion(StatusEffect):
+    def __init__(self, victim):
+        StatusEffect.__init__(self, "confusion", victim)
+        self.turns = round(5.0 * random.random())
+
+    def effects(self, victim):
+        rando = random.random()
+        print(victim.name + " is confused!")
+        sleep()
+        clear()
+        if self.turns <= 0:
+            print(victim.name + " snapped out of confusion!")
+            sleep()
+            clear()
+            victim.healthStatus = Normal(victim)
+            return True
+        if rando >= 0 and rando <= .5:
+            # ((((2A/5 + 2)*B*40)/C)/50) + 2
+            victim.hp -= round(((((2*victim.level/5 + 2)*victim.attackStat*40)/victim.defenseStat)/50) + 2)
+            if victim.hp <= 0:
+                victim.hp = 0
+                victim.fainted = True
+            print(victim.name + " hurt itself in its confusion!")
+            sleep()
+            clear()
+            self.turns -= 1
+            return False
+        self.turns -= 1
+        return True
+
+class Infatuation(StatusEffect):
+    def __init__(self):
+        StatusEffect.__init__(self, "infatuation")
+
+    def effects(self):
+        print("TODO")
+
+class Poisoned(StatusEffect):
+    def __init__(self):
+        StatusEffect.__init__(self, "poisoned")
+
+    def effects(self):
+        print("TODO")
+
+class BadlyPoisoned(StatusEffect):
+    def __init__(self):
+        StatusEffect.__init__(self, "badlypoisoned")
+
+    def effects(self):
+        print("TODO")
+        
+class Burned(StatusEffect):
+    def __init__(self):
+        StatusEffect.__init__(self, "burned")
+
+    def effects(self):
+        print("TODO")
+
+class Flinch(StatusEffect):
+    def __init__(self):
+        StatusEffect.__init__(self, "flinch")
+
+    def effects(self):
+        print("TODO")
+
+class LeechSeed(StatusEffect):
+    def __init__(self):
+        StatusEffect.__init__(self, "leechseed")
+
+    def effects(self):
+        print("TODO")
+
 class Move: 
     def __init__(self, name, power, accuracy, damageType, type, pp):
         self.name = name
         self.power = power
         self.accuracy = accuracy
+        # What are the different properties of moves?
+        # 1. Physical
+        # 2. Special
+        # 3. Status Effects (burn, paralysis, sleep)
+        # 4. 1 Hit KO
+        # 5. Healing moves
+        # 6. Stat effect moves (temporarily boost speed, attack, defense, or lower)
         self.damageType = damageType
         self.type = type
         self.maxPP = pp
@@ -477,7 +615,9 @@ class Move:
                 print("You don't have enough PP to use that move!")
                 sleep()
                 clear()
-            else:
+                return
+            # This function returns true if the attacker is able to attack. False if some status effect prohibits it.
+            if attacker.healthStatus.effects(attacker):
                 self.pp -= 1
                 return self.damageFunc(attacker, defender, player, wild)
 
@@ -509,14 +649,24 @@ class MoveSet:
         self.move3 = move3
         self.move4 = move4
 
-    def useMove1(self):
+    def getMove1(self):
         return self.move1
-    def useMove2(self):
+    def getMove2(self):
         return self.move2
-    def useMove3(self):
+    def getMove3(self):
         return self.move3
-    def useMove4(self):
+    def getMove4(self):
         return self.move4
+
+    def getMovesInArray(self):
+        return [self.move1, self.move2, self.move3, self.move4]
+
+    def size(self):
+        size = 0
+        for m in self.getMovesInArray():
+            if m is not None:
+                size += 1
+        return size
 
     def reset(self):
         self.move1.pp = self.move1.maxPP

@@ -6,6 +6,8 @@ venv/Lib/site-packages/pip-9\.0\.3\.dist-info/
 __pycache__/classes.cpython-36.pyc
 build/pokemonbattlesimulator/xref-pokemonbattlesimulator.html
 __pycache__/classes.cpython-36.pyc
+*.pkl
+*.pyc
 build/pokemonbattlesimulator/base_library.zip
 build/pokemonbattlesimulator/out00-Analysis.toc
 build/pokemonbattlesimulator/out00-COLLECT.toc
