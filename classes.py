@@ -43,9 +43,10 @@ def playSound(sound):
         None
 
 class Player: 
-    def __init__(self, pokemon, backpack): 
+    def __init__(self, pokemon, backpack, pc): 
         self.pokemon = pokemon 
         self.backpack = backpack 
+        self.pc = pc
         self.money = 0
         if self.pokemon[0]:
             for p in pokemon:
@@ -393,6 +394,18 @@ class Confusion(StatusEffect):
         self.turns -= 1
         return True
 
+class Flinch(StatusEffect):
+    def __init__(self, victim):
+        StatusEffect.__init__(self, "flinch", victim)
+
+    def effects(self, victim):
+        print(victim.name + " flinched!")
+        sleep()
+        clear()
+        victim.healthStatus = Normal(victim)
+        return False
+
+
 class Infatuation(StatusEffect):
     def __init__(self):
         StatusEffect.__init__(self, "infatuation")
@@ -421,12 +434,7 @@ class Burned(StatusEffect):
     def effects(self):
         print("TODO")
 
-class Flinch(StatusEffect):
-    def __init__(self):
-        StatusEffect.__init__(self, "flinch")
 
-    def effects(self):
-        print("TODO")
 
 class LeechSeed(StatusEffect):
     def __init__(self):

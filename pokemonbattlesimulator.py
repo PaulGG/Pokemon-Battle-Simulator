@@ -320,7 +320,7 @@ def optionThree():
     clear()
 
 def printPokemonWithEmptySlots(pokemon, goBack):
-    for i in range (1, 7):
+    for i in range (1, len(pokemon) + 1):
         if pokemon[i - 1] is not None:
             print(str(i) + ". " + pokemon[i - 1].name)
         else:
@@ -329,38 +329,102 @@ def printPokemonWithEmptySlots(pokemon, goBack):
         i += 1
         print(str(i) + ". Go Back")
 
+
+# this SHOULD be working.
+def sort(pokemon):
+    # need to get rid of all gaps in between list...how do we do this
+    # for each item in the list, if it is none, swap with the next?
+    for i in range(0, 4):
+        if pokemon[i] is None:
+            temp = pokemon[i + 1]
+            pokemon[i + 1] = pokemon[i]
+            pokemon[i] = temp
+    # 0, 1, 2, 3, 4, 5. The 5th can be none, that is OK
+
+def getPokemonAsOptions(pokemon):
+    options = []
+    for i in range(1, len(pokemon) + 1):
+        if pokemon[i - 1] is not None:
+            options.append(str(i) + ". " + pokemon[i - 1].name)
+        else:
+            options.append(str(i) + ". Empty")
+    return options
+
 def optionFour():
     clear()
-    # print user current team
+    print("Welcome to the PC. Here, all your pokemon are stored.")
+    sleep()
+    clear()
+    options = ["1. Deposit Pokemon", "2. Withdraw Pokemon", "3. Move Pokemon"]
     while True:
-        print("Here are the pokemon currently on your team: ")
-        printPokemonWithEmptySlots(player.pokemon, False)
-        strIn = getTextInput("Please enter a pokemon that you would like on your team. (~ to exit) ")
-        if strIn == "~": 
-            clear()
-            break
-        # search database
-        clear()
-        usrSelect = pokemonDatabase.get(strIn.lower(), None)
-        if usrSelect:
-            printPokemonWithEmptySlots(player.pokemon, True)
-            counter = 1
+        usrIn = getInputWithConstraints("Please select one of the above options (~ to exit). ", True, options, 1, 3)
+        if usrIn is 1:
+            sumOfPokemon = 0
             for p in player.pokemon:
-                if p:
-                    counter += 1
-            intIn = getInputWithConstraints("Which pokemon would you like to replace? (~ to exit) ", True, None, 1, counter)
-            if intIn == "~":
+                if p is not None:
+                    sumOfPokemon += 1
+            if sumOfPokemon <= 1:
+                print("You must have at least one pokemon in your team at all times, and you only have one!")
+                sleep()
                 clear()
-                break
-            player.pokemon[intIn - 1] = copy.deepcopy(usrSelect)
-            player.setActivePokemon()
-            writeData("player_data.pkl", player)
+                continue
+            while True:
+                printPokemonWithEmptySlots(player.pokemon, False)
+                pDeposit = getInputWithConstraints("Please select a pokemon to deposit (~ to exit). ", True, None, 1, 6)
+                if pDeposit is "~":
+                    return
+                if player.pokemon[pDeposit - 1] is None:
+                    print("You can't deposit an empty slot. ")
+                    sleep()
+                    clear()
+                else:
+                    player.pc.append(player.pokemon[pDeposit - 1])
+                    player.pokemon[pDeposit - 1] = None
+                    sort(player.pokemon)
+                    break
+        elif usrIn is 2:
+            if len(player.pc) is 0:
+                print("You don't have any pokemon in the PC to withdraw!")
+                sleep()
+                clear()
+                continue
+            check = True
+            for p in player.pokemon:
+                if p is None:
+                    check = False
+                    break
+            if check:
+                print("You cannot withdraw any pokemon because your team is full!")
+            else:
+                printPokemonWithEmptySlots(player.pc, False)
+                pWithdraw = getInputWithConstraints("Please select a pokemon to withdraw (~ to exit). ", True, None, 1, len(player.pc))
+                if pWithdraw is "~":
+                    return
+                # ask for input
+                selectedPokemon = player.pc[pWithdraw - 1]
+                pOptions = getPokemonAsOptions(player.pokemon)
+                pInsert = getInputWithConstraints("Please select a position on your team to insert this pokemon (~ to exit). ", True, pOptions, 1, 6)
+                if pInsert is "~":
+                    return
+                # if the user inputs a position where a pokemomn already is, say we can't do that.
+                if player.pokemon[pInsert - 1] is not None:
+                    print("You cannot withdraw a Pokemon into a slot that is occupied!")
+                # if the user inputs an empty position, put the pokemon there.
+                else:
+                    player.pokemon[pInsert - 1] = selectedPokemon
+                    sort(player.pokemon)
+                # remove from PC.
+                player.pc.remove(selectedPokemon)
+        elif usrIn is 3:
+            print("TODO")
+            # User can do two things: Swap around pokemon in their own team, or they can swap pokemon from their team and box.
+            # 1. Swap pokemon around in team
+            # 2. Swap pokemon around in box
+            # 3. Swap pokemon in team and box
+            
+        elif usrIn is "~":
             return
-        else:
-            print("That pokemon was not found in the database.")
-            sleep()
-            clear()
-    writeData("player_data.pkl", player)
+        writeData("player_data.pkl", player)
 
 def optionFive():
     move = getMoveInput(1)
@@ -546,7 +610,7 @@ def main():
     closing = False
     while not closing:
         options = ["Current Money Balance: $" + str(player.getMoney()), "-----------------------------" ,"1. Battle", "2. Buy Items", "3. Create new Pokemon",
-         "4. Create your Pokemon Team", "5. Create new Move", "6. Print Current Team", "7. Show Backpack Items", "8. Settings", "9. Close program.", "-----------------------------"]
+         "4. Edit your Pokemon Team", "5. Create new Move", "6. Print Current Team", "7. Show Backpack Items", "8. Settings", "9. Close program.", "-----------------------------"]
         userInput = getInputWithConstraints("Please select one of the above options. ", False, options)
         clear()
         closing = main_menu_chooser(userInput, closing)
@@ -587,11 +651,11 @@ movesDatabase = readData("moves_data.pkl", defaultMovesDatabase)
 pokemonDatabase = readData("pokemon_data.pkl", defaultPokemonDatabase)
 writeData("moves_data.pkl", movesDatabase)
 writeData("pokemon_data.pkl", pokemonDatabase)
-defaultPlayer = Player([copy.deepcopy(venusaur), copy.deepcopy(charizard), None, None, None, None], Backpack([]))
+defaultPlayer = Player([copy.deepcopy(venusaur), copy.deepcopy(charizard), None, None, None, None], Backpack([]), [])
 player = readData("player_data.pkl", defaultPlayer)
 writeData("player_data.pkl", player)
 
-enemy = Player([None, None, None, None, None, None], None)
+enemy = Player([None, None, None, None, None, None], None, None)
 
 def randomizeEnemyTeam():
     global enemy
@@ -779,9 +843,12 @@ def initializeGameMusic():
     except pygame.error:
         None
 
+gameCounter = 0
+
 def playGame(wild):
     global won
     won = False
+    global gameCounter
     initializeGameMusic()
     resetPlayerPokemon(player)
     randomizeEnemyTeam()
@@ -855,6 +922,10 @@ def playGame(wild):
                     else:
                         # check for player inhibitors
                         playerAttack(userInput, player.activePokemon, enemyActivePokemon)
+                    if isinstance(player.activePokemon.healthStatus, Flinch):
+                        # we need to add another thing for flinched. it cannot be in the same slot as 'paralysis'. 
+                        # otherwise it woudl be overridden.
+                        player.activePokemon.healthStatus = Normal()
                     # check who is dead again.
                     determineDead(player.activePokemon, enemyActivePokemon, enemyActivePokemon.wild)
                     # any turn by turn status effects should take place right now, regardless if a pokemon dies (unless the 
@@ -901,6 +972,7 @@ def playGame(wild):
                     # enemy attacks after usage of item
                     if not breakout2:
                         enemyAttack(player.activePokemon, enemyActivePokemon)
+                        gameCounter += 1 
                         if determineDead(player.activePokemon, enemyActivePokemon, enemyActivePokemon.wild):
                             if won: break
                         breakout = True
@@ -926,6 +998,8 @@ def playGame(wild):
                             sleep()
                             clear()
                             enemyAttack(player.activePokemon, enemyActivePokemon)
+                            global gameCounter
+                            gameCounter += 1 
                             breakout = True
                         elif select is player.activePokemon:
                             print("You cannot send out the pokemon that is currently in battle!")
@@ -950,7 +1024,9 @@ def playGame(wild):
             return switcher.get(args, invalid)()
 
         battlePicker(userInput)
-           
+        
+    
+
 def resetPlayerPokemon(human):
     for p in human.pokemon:
         if p:
@@ -962,6 +1038,7 @@ def resetPlayerPokemon(human):
             p.speed = p.defaultSpeed
             p.fainted = False
             p.moves.reset()
+    human.activePokemon = human.pokemon[0]
 
 if __name__ == "__main__":
     main()
