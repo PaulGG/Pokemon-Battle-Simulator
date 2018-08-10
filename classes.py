@@ -1,3 +1,5 @@
+#pylint: disable=E1101
+
 import random
 import abc
 import math
@@ -64,7 +66,7 @@ class Player:
                     self.activePokemon = p
                     break
         else:
-            self.activePokeon = None
+            self.activePokemon = None
 
     def takeMoney(self, amount):
         self.money -= amount
@@ -118,6 +120,28 @@ class Item:
             print("You do not have enough money to afford the " + self.name + "!")
             sleep()
             clear()
+
+class GenericPokeBall(Item):
+    def __init__(self, name, catchRate, price):
+        Item.__init__(self, name, price)
+        self.catchRate = catchRate
+
+class PokeBall(GenericPokeBall):
+    def __init__(self):
+        # TODO: fix prices for all poke ball variants
+        GenericPokeBall.__init__(self, "Poke Ball", 1, 100)
+
+class GreatBall(GenericPokeBall):
+    def __init__(self):
+        GenericPokeBall.__init__(self, "Great Ball", 1.5, 200)
+
+class UltraBall(GenericPokeBall):
+    def __init__(self):
+        GenericPokeBall.__init__(self, "Ultra Ball", 2, 500)
+
+class MasterBall(GenericPokeBall):
+    def __init__(self):
+        GenericPokeBall.__init__(self, "Master Ball", 255, 10000)
 
 class RevivalItem(Item):
     def __init__(self, name, reviveLevel, price):
@@ -179,7 +203,7 @@ class MaxPotion(HealingItem):
         HealingItem.__init__(self, "Max Potion", True, 2500)
 
     def use(self, user):
-        HealingItem.use(user)
+        HealingItem.use(self, user)
         user.healthStatus = "normal"
 
 class Pokemon:
@@ -348,8 +372,8 @@ class Paralysis(StatusEffect):
         self.victim.healthStatus = Normal(self.victim)
 
 class Frozen(StatusEffect):
-    def __init__(self):
-        StatusEffect.__init__(self, "frozen")
+    def __init__(self, victim):
+        StatusEffect.__init__(self, "frozen", victim)
 
     def effects(self, victim):
         rando = random.random()
@@ -407,29 +431,29 @@ class Flinch(StatusEffect):
 
 
 class Infatuation(StatusEffect):
-    def __init__(self):
-        StatusEffect.__init__(self, "infatuation")
+    def __init__(self, victim):
+        StatusEffect.__init__(self, "infatuation", victim)
 
     def effects(self):
         print("TODO")
 
 class Poisoned(StatusEffect):
-    def __init__(self):
-        StatusEffect.__init__(self, "poisoned")
+    def __init__(self, victim):
+        StatusEffect.__init__(self, "poisoned", victim)
 
     def effects(self):
         print("TODO")
 
 class BadlyPoisoned(StatusEffect):
-    def __init__(self):
-        StatusEffect.__init__(self, "badlypoisoned")
+    def __init__(self, victim):
+        StatusEffect.__init__(self, "badlypoisoned", victim)
 
     def effects(self):
         print("TODO")
         
 class Burned(StatusEffect):
-    def __init__(self):
-        StatusEffect.__init__(self, "burned")
+    def __init__(self, victim):
+        StatusEffect.__init__(self, "burned", victim)
 
     def effects(self):
         print("TODO")
@@ -437,8 +461,8 @@ class Burned(StatusEffect):
 
 
 class LeechSeed(StatusEffect):
-    def __init__(self):
-        StatusEffect.__init__(self, "leechseed")
+    def __init__(self, victim):
+        StatusEffect.__init__(self, "leechseed", victim)
 
     def effects(self):
         print("TODO")

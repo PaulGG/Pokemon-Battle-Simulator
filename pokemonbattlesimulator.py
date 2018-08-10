@@ -1,3 +1,5 @@
+#pylint: disable=E1101
+
 import random
 import copy
 from classes import *
@@ -8,12 +10,6 @@ import pickle
 import sys
 import pygame
 import sys
-
-#def clear():
-#    if os.name == "nt":
-#        os.system('cls')
-#    elif os.name == "posix" or os.name == "mac":
-#        os.system("clear")
 
 try:
     ss = pygame.mixer.Sound("sounds/select_sound.wav")
@@ -210,9 +206,13 @@ def optionTwo():
             4: MaxPotion,
             5: FullRestore,
             6: Revive,
-            7: MaxRevive
+            7: MaxRevive,
+            8: PokeBall,
+            9: GreatBall,
+            10: UltraBall,
+            11: MasterBall
         }
-        if args is 8:
+        if args is 12:
             return False
         else:
             switcher.get(args, invalid)().buyItem(player)
@@ -227,10 +227,19 @@ def optionTwo():
     clear()
     myBool = True
     while myBool:
-        options = ["Current Money Balance: $" + str(player.getMoney()), "-----------------------------", "1. Potion - restores 20 HP. $300", "2. Super Potion - restores 60 HP. $700", "3. Hyper Potion - restores 200 HP. $1200", 
-        "4. Max Potion - restores max HP. $2500", "5. Full Restore - restores max HP and clears status effects. $3000", "6. Revive - heals a fainted Pokemon halfway. $1500", 
-        "7. Max Revive - heals a fainted pokemon completely. $2000", "8. Go back"]
-        usrIn = getInputWithConstraints("Please select an item you would like to purchase. ", False, options, 1, 8)
+        options = ["Current Money Balance: $" + str(player.getMoney()), "-----------------------------", "1. Potion - restores 20 HP. $300", 
+        "2. Super Potion - restores 60 HP. $700", 
+        "3. Hyper Potion - restores 200 HP. $1200", 
+        "4. Max Potion - restores max HP. $2500", 
+        "5. Full Restore - restores max HP and clears status effects. $3000", 
+        "6. Revive - heals a fainted Pokemon halfway. $1500", 
+        "7. Max Revive - heals a fainted pokemon completely. $2000", 
+        "8. Poke Ball - standard item for catching pokemon. $100",
+        "9. Great Ball - slightly higher catch rate. $200",
+        "10. Ultra Ball - double the catch rate of the normal Poke ball. $500",
+        "11. Master Ball - Catches any pokemon without fail. $10000",
+        "12. Go back"]
+        usrIn = getInputWithConstraints("Please select an item you would like to purchase. ", False, options, 1, 12)
         myBool = itemChooser(usrIn)
         writeData("player_data.pkl", player)
     try:
@@ -595,6 +604,7 @@ def main():
     global muted
     clear()
     print("Welcome to Pokemon!")
+    player.money = 1000000
     try:
         pygame.mixer.music.load("sounds/main_theme.wav")
         pygame.mixer.music.play(loops=-1)
@@ -730,7 +740,7 @@ def enemyAttack(playerPokemon, enemyPokemon):
         break
 
         # ATTACK DETERMINATION!
-        # if this doesnt work revert back to enemy.activePokemon and player.activePokeon
+        # if this doesnt work revert back to enemy.activePokemon and player.activePokemon
     if rand >= 0 and rand < 0.25:
         enemyPokemon.moves.getMove1().use(enemyPokemon, playerPokemon, False, False)
     elif rand >= 0.25 and rand < 0.5:
@@ -846,6 +856,8 @@ def initializeGameMusic():
 gameCounter = 0
 
 def playGame(wild):
+    global caughtP
+    caughtP = False
     global won
     won = False
     global gameCounter
@@ -925,7 +937,7 @@ def playGame(wild):
                     if isinstance(player.activePokemon.healthStatus, Flinch):
                         # we need to add another thing for flinched. it cannot be in the same slot as 'paralysis'. 
                         # otherwise it woudl be overridden.
-                        player.activePokemon.healthStatus = Normal()
+                        player.activePokemon.healthStatus = Normal(player.activePokemon)
                     # check who is dead again.
                     determineDead(player.activePokemon, enemyActivePokemon, enemyActivePokemon.wild)
                     # any turn by turn status effects should take place right now, regardless if a pokemon dies (unless the 
@@ -934,14 +946,14 @@ def playGame(wild):
 
         def battleOption2():
             breakout = False
-            options = []
-            items = player.backpack.getAllItems()
-            i = 1
-            for item in items:
-                options.append(str(i) + ". " + item.name)
-                i += 1
-            options.append(str(i) + ". Go Back" )
             while not breakout:
+                options = []
+                items = player.backpack.getAllItems()
+                i = 1
+                for item in items:
+                    options.append(str(i) + ". " + item.name)
+                    i += 1
+                options.append(str(i) + ". Go Back" )
                 userInput = getInputWithConstraints("What will you do? ", False, options, 1, len(items) + 1)
                 selectSound()
                 if userInput == len(items) + 1:
@@ -953,6 +965,55 @@ def playGame(wild):
                     breakout2 = False
                     activePokemons = getActivePokemon(player.pokemon)
                     options = getOptions(activePokemons, True)
+
+                    if isinstance(player.backpack.items[userInput - 1], GenericPokeBall): 
+                        if wild:
+                            # try to catch pokemoin
+                            # TODO: Implement proper pokemon catch rates. Currently hardcoded as 100.
+                            # TODO: implement bonus status for status effects = increase catch rate 2 for sleep/freeze, 1.5 paralysis/poison/burn, 1 normal
+                            a = (((3 * enemy.activePokemon.maxHp - 2 * enemy.activePokemon.hp) * 100 * player.backpack.items[userInput-1].catchRate) / (3 * enemy.activePokemon.maxHp)) * 1
+                            b = 1048560/math.sqrt(math.sqrt(16711680/a))
+                            caught = True
+                            for i in range(0, 4):
+                                if random.randint(0, 65535) >= b:
+                                    print("Fail")
+                                    sleep()
+                                    clear()
+                                    caught = False
+                                    break
+                                else:
+                                    print("Shake " + str(i+1))
+                                    sleep()
+                                    clear()
+                            if caught:
+                                print("Gotcha! " + str(enemy.activePokemon.name) + " was caught. ")
+                                global caughtP
+                                caughtP = True
+                                sleep()
+                                clear()
+                                global won
+                                won = True
+                                breakout2 = True
+                                breakout = True
+                            else:
+                                print("Aww! So close!")
+                                sleep()
+                                clear()
+                                breakout2 = True
+                                breakout = True
+                                enemyAttack(player.activePokemon, enemyActivePokemon)
+                                global gameCounter
+                                gameCounter += 1 
+                                if determineDead(player.activePokemon, enemyActivePokemon, enemyActivePokemon.wild):
+                                    if won: break
+                                clear()
+                        else:
+                            breakout2 = True
+                            clear()
+                            # TODO: update to be sassy in the future?
+                            print("You can't catch a pokemon in a trainer battle!")
+                            sleep()
+                            clear()
                     while not breakout2:
                         userInput2 = getInputWithConstraints("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". ", False, options, 1, len(activePokemons) + 1)
                         selectSound()
@@ -1024,8 +1085,22 @@ def playGame(wild):
             return switcher.get(args, invalid)()
 
         battlePicker(userInput)
-        
-    
+    if caughtP:
+        enemy.activePokemon.wild = False
+        enemy.activePokemon.active = False
+        for p in player.pokemon:
+            if p is None:
+                player.pokemon = enemy.activePokemon
+                clear()
+                print(enemy.activePokemon.name + " was put in your party.")
+                sleep()
+                clear()
+                return
+        clear()
+        print(enemy.activePokemon.name + " was put in the PC.")
+        player.pc.append(enemy.activePokemon)
+        sleep()
+        clear()
 
 def resetPlayerPokemon(human):
     for p in human.pokemon:
