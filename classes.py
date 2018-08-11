@@ -602,6 +602,7 @@ class Move:
                 time.sleep(delay)
                 print("The wild " + attacker.name + " missed!")
             return
+
         targets = 1
         weather = self.determineWeatherMoveDamage()
         critical = self.determineCrit(attacker, defender)
@@ -626,27 +627,37 @@ class Move:
         else:
             print("The wild " + attacker.name + " used " + self.name + "!")
             time.sleep(delay)
-        if effectiveness is 0:
-            print("It does not affect " + defender.name + "...")
+        if self.damageType == "special" or self.damageType == "physical":
+            if effectiveness is 0:
+                print("It does not affect " + defender.name + "...")
+                time.sleep(delay)
+            elif effectiveness is 1:
+                playSound(normalEffective)
+                time.sleep(delay)
+                checkCritical(critical, effectiveness)
+                print("It had normal effectiveness.")
+                time.sleep(delay)
+            elif effectiveness > 1:
+                playSound(superEffective)
+                time.sleep(delay)
+                checkCritical(critical, effectiveness)
+                print("It's super effective!")
+                time.sleep(delay)
+            elif effectiveness < 1:
+                playSound(notEffective)
+                time.sleep(delay)
+                checkCritical(critical, effectiveness)
+                print("It's not very effective...")
+                time.sleep(delay)
+        elif self.damageType == "onehitko":
+            print("Oof! It's a one-hit KO!")
             time.sleep(delay)
-        elif effectiveness is 1:
-            playSound(normalEffective)
-            time.sleep(delay)
-            checkCritical(critical, effectiveness)
-            print("It had normal effectiveness.")
-            time.sleep(delay)
-        elif effectiveness > 1:
-            playSound(superEffective)
-            time.sleep(delay)
-            checkCritical(critical, effectiveness)
-            print("It's super effective!")
-            time.sleep(delay)
-        elif effectiveness < 1:
-            playSound(notEffective)
-            time.sleep(delay)
-            checkCritical(critical, effectiveness)
-            print("It's not very effective...")
-            time.sleep(delay)
+        elif self.damageType == "statchange":
+            print("TODO")
+        elif self.damageType == "statuseffect":
+            print("TODO")
+        else:
+            print("TODO")
 
         clear()
 
@@ -657,11 +668,14 @@ class Move:
             if defender.hp <= 0:
                 defender.hp = 0
                 defender.fainted = True
-        else: 
+        elif self.damageType == "special": 
             defender.hp -= round(((((2 * attacker.level) / 5 + 2) * self.power * (attacker.spAttack / defender.spDefense)) / 50 + 2) * modifier)
             if defender.hp <= 0:
                 defender.hp = 0
                 defender.fainted = True
+        elif self.damageType == "onehitko":
+            defender.hp = 0
+            defender.fainted = True
         
     def use(self, attacker, defender, player, wild):
             if self.pp <= 0:
@@ -673,7 +687,6 @@ class Move:
             if attacker.healthStatus.effects(attacker):
                 self.pp -= 1
                 return self.damageFunc(attacker, defender, player, wild)
-
 
 class Environment:
     # All possible weather values are: Hail, Sandstorm, Rain, and Harsh Sunlight
