@@ -85,18 +85,36 @@ class Player:
         return self.money
  
 class Backpack:
-    def __init__(self, items):
-        self.items = items
+    def __init__(self, stacks):
+        self.stacks = stacks
 
-    def getAllItems(self):
-        return self.items
+    def getItemStacks(self):
+        return self.stacks
 
     def useItem(self, index, user):
-        self.items[index].use(user)
-        del self.items[index]
+        list(self.stacks.values())[index].item.use(user)
+        list(self.stacks.values())[index].removeItem()
 
     def addItem(self, item):
-        self.items.append(item)
+        stack = self.stacks.get(item.name)
+        if not stack:
+            self.stacks.update({item.name: Stack(item)})
+        else:
+            stack.addItem()
+
+class Stack:
+    def __init__(self, item):
+        self.item = item
+        self.amount = 1
+    
+    def addItem(self, amount=None):
+        self.amount = self.amount + amount if amount else self.amount + 1
+    
+    def removeItem(self, amount=None):
+        self.amount = self.amount - amount if amount else self.amount - 1
+
+    def __str__(self):
+        return self.item.name + " x " + str(self.amount)           
 
 class Item:
     def __init__(self, name, price):

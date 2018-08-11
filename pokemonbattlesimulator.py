@@ -451,8 +451,14 @@ def optionSix():
     
 
 def optionSeven():
-    for i in player.backpack.getAllItems():
-        print(i.name)
+    global player
+    stacks = player.backpack.stacks
+    if len(stacks) > 0:
+        for s in stacks:
+            print(stacks.get(s))
+    else:
+        print("You have no items.")
+    
     time.sleep(5)
     clear()
 
@@ -619,8 +625,20 @@ def main():
     clear()
     closing = False
     while not closing:
-        options = ["Current Money Balance: $" + str(player.getMoney()), "-----------------------------" ,"1. Battle", "2. Buy Items", "3. Create new Pokemon",
-         "4. Edit your Pokemon Team", "5. Create new Move", "6. Print Current Team", "7. Show Backpack Items", "8. Settings", "9. Close program.", "-----------------------------"]
+        options = [
+        "Current Money Balance: $" + str(player.getMoney()), 
+        "-----------------------------" ,
+        "1. Battle", 
+        "2. Shop", 
+        "3. Create new Pokemon",
+        "4. Edit your Pokemon Team", 
+        "5. Create new Move", 
+        "6. View Team", 
+        "7. Inventory", 
+        "8. Settings", 
+        "9. Close program.", 
+        "-----------------------------"
+        ]
         userInput = getInputWithConstraints("Please select one of the above options. ", False, options)
         clear()
         closing = main_menu_chooser(userInput, closing)
@@ -661,7 +679,7 @@ movesDatabase = readData("moves_data.pkl", defaultMovesDatabase)
 pokemonDatabase = readData("pokemon_data.pkl", defaultPokemonDatabase)
 writeData("moves_data.pkl", movesDatabase)
 writeData("pokemon_data.pkl", pokemonDatabase)
-defaultPlayer = Player([copy.deepcopy(venusaur), copy.deepcopy(charizard), None, None, None, None], Backpack([]), [])
+defaultPlayer = Player([copy.deepcopy(venusaur), copy.deepcopy(charizard), None, None, None, None], Backpack({}), [])
 player = readData("player_data.pkl", defaultPlayer)
 writeData("player_data.pkl", player)
 
@@ -948,15 +966,16 @@ def playGame(wild):
             breakout = False
             while not breakout:
                 options = []
-                items = player.backpack.getAllItems()
                 i = 1
-                for item in items:
-                    options.append(str(i) + ". " + item.name)
+                stacks = player.backpack.stacks
+                for s in stacks:
+                    options.append(str(i) + ". " + str(stacks.get(s)))
                     i += 1
+                
                 options.append(str(i) + ". Go Back" )
-                userInput = getInputWithConstraints("What will you do? ", False, options, 1, len(items) + 1)
+                userInput = getInputWithConstraints("What will you do? ", False, options, 1, len(stacks) + 1)
                 selectSound()
-                if userInput == len(items) + 1:
+                if userInput == len(stacks) + 1:
                     clear()
                     breakout = True
                     continue
@@ -966,12 +985,12 @@ def playGame(wild):
                     activePokemons = getActivePokemon(player.pokemon)
                     options = getOptions(activePokemons, True)
 
-                    if isinstance(player.backpack.items[userInput - 1], GenericPokeBall): 
+                    if isinstance(list(player.backpack.stacks.values())[userInput - 1], GenericPokeBall): 
                         if wild:
                             # try to catch pokemoin
                             # TODO: Implement proper pokemon catch rates. Currently hardcoded as 100.
                             # TODO: implement bonus status for status effects = increase catch rate 2 for sleep/freeze, 1.5 paralysis/poison/burn, 1 normal
-                            a = (((3 * enemy.activePokemon.maxHp - 2 * enemy.activePokemon.hp) * 100 * player.backpack.items[userInput-1].catchRate) / (3 * enemy.activePokemon.maxHp)) * 1
+                            a = (((3 * enemy.activePokemon.maxHp - 2 * enemy.activePokemon.hp) * 100 * list(player.backpack.stacks.values())[userInput - 1].catchRate) / (3 * enemy.activePokemon.maxHp)) * 1
                             b = 65536/(255/a)**0.1875
                             caught = True
                             for i in range(0, 4):
@@ -1015,14 +1034,14 @@ def playGame(wild):
                             sleep()
                             clear()
                     while not breakout2:
-                        userInput2 = getInputWithConstraints("Please select a pokemon for the " + player.backpack.items[userInput - 1].name + ". ", False, options, 1, len(activePokemons) + 1)
+                        userInput2 = getInputWithConstraints("Please select a pokemon for the " + list(player.backpack.stacks.values())[userInput - 1].item.name + ". ", False, options, 1, len(activePokemons) + 1)
                         selectSound()
                         select = player.pokemon[userInput2 - 1]
                         clear()
-                        if (select.fainted is False and not isinstance(player.backpack.items[userInput - 1], RevivalItem)) or (select.fainted is True and isinstance(player.backpack.items[userInput - 1], RevivalItem)):
+                        if (select.fainted is False and not isinstance(list(player.backpack.stacks.values())[userInput - 1], RevivalItem)) or (select.fainted is True and isinstance(list(player.backpack.stack.values())[userInput - 1], RevivalItem)):
                             player.backpack.useItem(userInput - 1, select)
                             break
-                        elif select.fainted and not isinstance(player.backpack.items[userInput - 1, RevivalItem]):
+                        elif select.fainted and not isinstance(list(player.backpack.stacks.values())[userInput - 1], RevivalItem):
                             print("You cannot use a healing item on a fainted pokemon!")
                             sleep()
                             clear()
