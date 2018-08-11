@@ -972,7 +972,7 @@ def playGame(wild):
                             # TODO: Implement proper pokemon catch rates. Currently hardcoded as 100.
                             # TODO: implement bonus status for status effects = increase catch rate 2 for sleep/freeze, 1.5 paralysis/poison/burn, 1 normal
                             a = (((3 * enemy.activePokemon.maxHp - 2 * enemy.activePokemon.hp) * 100 * player.backpack.items[userInput-1].catchRate) / (3 * enemy.activePokemon.maxHp)) * 1
-                            b = 1048560/math.sqrt(math.sqrt(16711680/a))
+                            b = 65536/(255/a)**0.1875
                             caught = True
                             for i in range(0, 4):
                                 if random.randint(0, 65535) >= b:
