@@ -92,8 +92,11 @@ class Backpack:
         return self.stacks
 
     def useItem(self, index, user):
-        list(self.stacks.values())[index].item.use(user)
-        list(self.stacks.values())[index].removeItem()
+        stack = list(self.stacks.values())[index]
+        stack.item.use(user)
+        stack.removeItem()
+        if stack.amount <= 0:
+            self.stacks.pop(stack.item.name, None)
 
     def addItem(self, item):
         stack = self.stacks.get(item.name)
