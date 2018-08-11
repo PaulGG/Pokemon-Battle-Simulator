@@ -1009,7 +1009,8 @@ def playGame(wild):
     resetPlayerPokemon(enemy)
     # Is the enemy a wild pokemon or a trainer battle?
     if wild:
-        enemyActivePokemon = getRandomPokemon()
+        enemy.activePokemon = getRandomPokemon()
+        enemyActivePokemon = enemy.activePokemon
         enemyActivePokemon.wild = True
     else: 
         enemyActivePokemon = enemy.activePokemon
@@ -1109,13 +1110,14 @@ def playGame(wild):
                     activePokemons = getActivePokemon(player.pokemon)
                     options = getOptions(activePokemons, True)
 
-                    if isinstance(list(player.backpack.stacks.values())[userInput - 1], GenericPokeBall): 
+                    if isinstance(list(player.backpack.stacks.values())[userInput - 1].item, GenericPokeBall): 
                         if wild:
                             # try to catch pokemoin
                             # TODO: Implement proper pokemon catch rates. Currently hardcoded as 100.
                             # TODO: implement bonus status for status effects = increase catch rate 2 for sleep/freeze, 1.5 paralysis/poison/burn, 1 normal
-                            a = (((3 * enemy.activePokemon.maxHp - 2 * enemy.activePokemon.hp) * 100 * list(player.backpack.stacks.values())[userInput - 1].catchRate) / (3 * enemy.activePokemon.maxHp)) * 1
+                            a = (((3 * enemy.activePokemon.maxHp - 2 * enemy.activePokemon.hp) * 100 * list(player.backpack.stacks.values())[userInput - 1].item.catchRate) / (3 * enemy.activePokemon.maxHp)) * 1
                             b = 65536/(255/a)**0.1875
+                            player.backpack.useItem(userInput - 1, None)
                             caught = True
                             for i in range(0, 4):
                                 if random.randint(0, 65535) >= b:
@@ -1234,9 +1236,9 @@ def playGame(wild):
     if caughtP:
         enemy.activePokemon.wild = False
         enemy.activePokemon.active = False
-        for p in player.pokemon:
-            if p is None:
-                player.pokemon = enemy.activePokemon
+        for i in range(0,6):
+            if not player.pokemon[i]:
+                player.pokemon[i] = enemy.activePokemon
                 clear()
                 print(enemy.activePokemon.name + " was put in your party.")
                 sleep()
