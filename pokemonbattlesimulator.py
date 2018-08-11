@@ -43,13 +43,15 @@ def writeData(filename, data):
         pickle.dump(data, output, pickle.HIGHEST_PROTOCOL)
 
 def optionOne():
-    options = ["1. Wild Pokemon Battle", "2. Trainer Pokemon Battle"]
-    wildOrNot = getInputWithConstraints("Please say if you would like to have a wild pokemon battle or a trainer battle. ", True, options, 1, 2)
+    options = ["1. Wild Pokemon Battle", "2. Trainer Pokemon Battle", "3. Go Back"]
+    wildOrNot = getInputWithConstraints("Please say if you would like to have a wild pokemon battle or a trainer battle. ", True, options, 1, 3)
     if wildOrNot is 1:
         # start battle with wild pokemon as enemy.
         startBattle(True)
-    else: 
+    elif wildOrNot is 2: 
         startBattle(False)
+    else:
+        return
     battleAgain(options)
 
 def getTextInput(message):
@@ -248,7 +250,7 @@ def optionTwo():
     except pygame.error:
         None
     
-def optionThree():
+def optionSeven():
     clear()
     print("Create your own Pokemon here!")
     print("Pokemon made here will be saved to the file.")
@@ -357,16 +359,23 @@ def getPokemonAsOptions(pokemon):
             options.append(str(i) + ". " + pokemon[i - 1].name)
         else:
             options.append(str(i) + ". Empty")
+    j = i + 1
+    options.append(str(j) + ". Go Back")
     return options
 
-def optionFour():
+def optionFive():
     clear()
     print("Welcome to the PC. Here, all your pokemon are stored.")
     sleep()
     clear()
-    options = ["1. Deposit Pokemon", "2. Withdraw Pokemon", "3. Move Pokemon"]
     while True:
-        usrIn = getInputWithConstraints("Please select one of the above options (~ to exit). ", True, options, 1, 3)
+        options = [
+            "1. Deposit Pokemon", 
+            "2. Withdraw Pokemon", 
+            "3. Move Pokemon",
+            "4. Go Back"
+            ]
+        usrIn = getInputWithConstraints("Please select one of the above options. ", False, options, 1, 4)
         if usrIn is 1:
             sumOfPokemon = 0
             for p in player.pokemon:
@@ -406,14 +415,13 @@ def optionFour():
                 print("You cannot withdraw any pokemon because your team is full!")
             else:
                 printPokemonWithEmptySlots(player.pc, False)
-                pWithdraw = getInputWithConstraints("Please select a pokemon to withdraw (~ to exit). ", True, None, 1, len(player.pc))
-                if pWithdraw is "~":
+                pWithdraw = getInputWithConstraints("Please select a pokemon to withdraw. ", False, getPokemonAsOptions(player.pokemon), 1, len(player.pc) + 1)
+                if pWithdraw is len(player.pc) + 1:
                     return
                 # ask for input
                 selectedPokemon = player.pc[pWithdraw - 1]
-                pOptions = getPokemonAsOptions(player.pokemon)
-                pInsert = getInputWithConstraints("Please select a position on your team to insert this pokemon (~ to exit). ", True, pOptions, 1, 6)
-                if pInsert is "~":
+                pInsert = getInputWithConstraints("Please select a position on your team to insert this pokemon. ", False, getPokemonAsOptions(player.pokemon), 1, 7)
+                if pInsert is 7:
                     return
                 # if the user inputs a position where a pokemomn already is, say we can't do that.
                 if player.pokemon[pInsert - 1] is not None:
@@ -425,17 +433,108 @@ def optionFour():
                 # remove from PC.
                 player.pc.remove(selectedPokemon)
         elif usrIn is 3:
-            print("TODO")
             # User can do two things: Swap around pokemon in their own team, or they can swap pokemon from their team and box.
-            # 1. Swap pokemon around in team
-            # 2. Swap pokemon around in box
-            # 3. Swap pokemon in team and box
-            
-        elif usrIn is "~":
+            while True:
+                options = [
+                    "1. Swap Pokemon around in team",
+                    "2. Swap Pokemon around in box", 
+                    "3. Swap pokemon around in team and box",
+                    "4. Go Back"
+                ]
+                opt = getInputWithConstraints("Please select one of the options. " , False, options, 1, 4)
+                if opt is 4:
+                    break
+                # 1. Swap pokemon around in team
+                if opt is 1:
+                    while True:
+                        swap1 = getInputWithConstraints("Please select a Pokemon. " , False, getPokemonAsOptions(player.pokemon), 1, 7)
+                        if swap1 is 7:
+                            break
+                        if player.pokemon[swap1 - 1] is None:
+                            clear()
+                            print("You cannot select an empty slot to swap.")
+                            sleep()
+                            clear()
+                            break
+                        swap2 = getInputWithConstraints("Please select a Pokemon to swap. ", False, getPokemonAsOptions(player.pokemon), 1, 7)
+                        if swap1 is 7:
+                            break
+                        if player.pokemon[swap2 - 1] is None:
+                            clear()
+                            print("You cannot select an empty slot to swap.")
+                            sleep()
+                            clear()
+                            break
+                        if swap1 is swap2:
+                            clear()
+                            print("You can't swap a pokemon with itself.")
+                            sleep()
+                            clear()
+                            break
+                        else:
+                            temp = player.pokemon[swap1 - 1]
+                            player.pokemon[swap1 - 1] = player.pokemon[swap2 - 1]
+                            player.pokemon[swap2 - 1] = temp
+                            break
+                # 2. Swap pokemon around in box
+                elif opt is 2:
+                    while True:
+                        if len(player.pc) <= 0:
+                            print("You do not have any Pokemon in your PC!")
+                            sleep()
+                            clear()
+                            break 
+                        swap1 = getInputWithConstraints("Please selet a Pokemon to swap. ", False, getPokemonAsOptions(player.pc), 1, len(player.pc)+1)
+                        if swap1 is len(player.pc)+1:
+                            break
+                        if player.pokemon[swap1 - 1] is None:
+                                clear()
+                                print("You cannot select an empty slot to swap.")
+                                sleep()
+                                clear()
+                                break
+                        swap2 = getInputWithConstraints("Please selet a Pokemon to swap. ", False, getPokemonAsOptions(player.pc), 1, len(player.pc)+1)
+                        if swap2 is len(player.pc)+1:
+                            break
+                        if player.pokemon[swap2 - 1] is None:
+                                clear()
+                                print("You cannot select an empty slot to swap.")
+                                sleep()
+                                clear()
+                                break
+                        if swap1 is swap2:
+                            clear()
+                            print("You can't swap a Pokemon with itself.")
+                            sleep()
+                            clear()
+                            break
+                        else:
+                            temp = player.pokemon[swap1 - 1]
+                            player.pokemon[swap1 - 1] = player.pokemon[swap2 - 1]
+                            player.pokemon[swap2 - 1] = temp
+                            break
+                # 3. Swap pokemon in team and box
+                elif opt is 3:
+                    while True:
+                        if len(player.pc) <= 0:
+                            print("You do not have any Pokemon in your PC!")
+                            sleep()
+                            clear()
+                            break
+                        swap1 = getInputWithConstraints("Please select a Pokemon from your PC. ", False, getPokemonAsOptions(player.pc), 1, len(player.pc)+1)
+                        if swap1 is len(player.pc)+1:
+                            break
+                        swap2 = getInputWithConstraints("Please select a Pokemon from your party to swap. ", False, getPokemonAsOptions(player.pokemon), 1, 7)
+                        if swap2 is 7:
+                            break
+                        temp = player.pokemon[swap2 - 1]
+                        player.pokemon[swap2 - 1] = player.pc[swap1 - 1]
+                        player.pc[swap1 - 1] = temp
+        elif usrIn is 4:
             return
         writeData("player_data.pkl", player)
 
-def optionFive():
+def optionSix():
     move = getMoveInput(1)
     if not isinstance(move, Move):
         clear()
@@ -444,13 +543,13 @@ def optionFive():
     writeData("moves_data.pkl", movesDatabase)
     clear()
 
-def optionSix():
+def optionFour():
     printPokemonWithEmptySlots(player.pokemon, False)
-    time.sleep(5)
+    input("Press enter to continue. ")
     clear()
     
 
-def optionSeven():
+def optionThree():
     global player
     stacks = player.backpack.stacks
     if len(stacks) > 0:
@@ -458,8 +557,7 @@ def optionSeven():
             print(stacks.get(s))
     else:
         print("You have no items.")
-    
-    time.sleep(5)
+    input("Press enter to continue.")
     clear()
 
 defaultGameVolume = 1
@@ -630,11 +728,11 @@ def main():
         "-----------------------------" ,
         "1. Battle", 
         "2. Shop", 
-        "3. Create new Pokemon",
-        "4. Edit your Pokemon Team", 
-        "5. Create new Move", 
-        "6. View Team", 
-        "7. Inventory", 
+        "3. Inventory",
+        "4. View Team", 
+        "5. Edit your Pokemon Team", 
+        "6. Create new Move", 
+        "7. Create new Pokemon", 
         "8. Settings", 
         "9. Close program.", 
         "-----------------------------"
@@ -902,7 +1000,7 @@ def playGame(wild):
         if not wild: enemyActivePokemon = enemy.activePokemon
         pStatus = "Pokemon Status: " + player.activePokemon.name + " HP: " + str(player.activePokemon.hp) + " Status: " + player.activePokemon.healthStatus.name + " | Level: " + str(player.activePokemon.level)
         eStatus = "Enemy Pokemon Status: " + enemyActivePokemon.name + " HP: " + str(enemyActivePokemon.hp)+ " Status: " + enemyActivePokemon.healthStatus.name + " | Level: " + str(enemyActivePokemon.level)
-        options = [pStatus, eStatus, "1. Fight", "2. Bag", "3. Pokemon"]
+        options = [eStatus, pStatus, "1. Fight", "2. Bag", "3. Pokemon"]
         # player chooses option
         userInput = getInputWithConstraints("What will you do? ", False, options)
         clear()
@@ -1035,6 +1133,9 @@ def playGame(wild):
                             clear()
                     while not breakout2:
                         userInput2 = getInputWithConstraints("Please select a pokemon for the " + list(player.backpack.stacks.values())[userInput - 1].item.name + ". ", False, options, 1, len(activePokemons) + 1)
+                        if userInput2 is len(activePokemons) + 1:
+                            breakout2 = True
+                            break
                         selectSound()
                         select = player.pokemon[userInput2 - 1]
                         clear()
