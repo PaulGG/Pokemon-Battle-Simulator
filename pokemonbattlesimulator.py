@@ -42,14 +42,15 @@ def writeData(filename, data):
     with open(filename, "wb") as output:
         pickle.dump(data, output, pickle.HIGHEST_PROTOCOL)
 
-def optionOne():
-    options = ["1. Wild Pokemon Battle", "2. Trainer Pokemon Battle", "3. Go Back"]
+def selectBattle():
+    options = [
+        "1. Trainer Pokemon Battle", 
+        "2. Wild Pokemon Battle", 
+        "3. Go Back"
+        ]
     wildOrNot = getInputWithConstraints("Please say if you would like to have a wild pokemon battle or a trainer battle. ", True, options, 1, 3)
-    if wildOrNot is 1:
-        # start battle with wild pokemon as enemy.
-        startBattle(True)
-    elif wildOrNot is 2: 
-        startBattle(False)
+    if wildOrNot is not 3:
+        startBattle(wildOrNot - 1)
     else:
         return
     battleAgain(options)
@@ -215,7 +216,7 @@ def typeInput(msg, prim):
         sleep()
         clear()
 
-def optionTwo():
+def pokeShop():
     def itemChooser(args):
         switcher = {
             1: Potion,
@@ -266,7 +267,7 @@ def optionTwo():
     except pygame.error:
         None
     
-def optionSeven():
+def createPokemon():
     clear()
     print("Create your own Pokemon here!")
     print("Pokemon made here will be saved to the file.")
@@ -379,7 +380,7 @@ def getPokemonAsOptions(pokemon):
     options.append(str(j) + ". Go Back")
     return options
 
-def optionFive():
+def viewPokemonPC():
     clear()
     print("Welcome to the PC. Here, all your pokemon are stored.")
     sleep()
@@ -550,7 +551,7 @@ def optionFive():
             return
         writeData("player_data.pkl", player)
 
-def optionSix():
+def createMove():
     move = getMoveInput(1)
     if not isinstance(move, Move):
         clear()
@@ -559,13 +560,13 @@ def optionSix():
     writeData("moves_data.pkl", movesDatabase)
     clear()
 
-def optionFour():
+def viewPokemon():
     printPokemonWithEmptySlots(player.pokemon, False)
     input("Press enter to continue. ")
     clear()
     
 
-def optionThree():
+def viewBackpack():
     global player
     stacks = player.backpack.stacks
     if len(stacks) > 0:
@@ -593,7 +594,7 @@ if muted:
     except AttributeError:
         None
 
-def optionEight():
+def settingsEditor():
     global muted
     global gameVolume
     global selectVolume
@@ -679,18 +680,18 @@ def invalid():
     clear()
     print("That option does not exist!")
     sleep()
-    clear()
+    clear() 
 
 def main_menu_chooser(args, closing):
     switcher = {
-        1: optionOne,
-        2: optionTwo,
-        3: optionThree,
-        4: optionFour,
-        5: optionFive,
-        6: optionSix,
-        7: optionSeven,
-        8: optionEight
+        1: selectBattle,
+        2: pokeShop,
+        3: viewBackpack,
+        4: viewPokemon,
+        5: viewPokemonPC,
+        6: createMove,
+        7: createPokemon,
+        8: settingsEditor
     }
     if args is 9:
         optionNine()
@@ -1033,7 +1034,7 @@ def playGame(wild):
         clear()
 
         # Refactored.
-        def battleOption1():
+        def attackOptions():
             # Content to present to user before while loop.
             usrMoves = []
             for i in range(1, player.activePokemon.moves.size() + 1):
@@ -1087,7 +1088,7 @@ def playGame(wild):
                     # pokemon with the status effect is dead)
                     break
 
-        def battleOption2():
+        def bagOptions():
             breakout = False
             while not breakout:
                 options = []
@@ -1187,7 +1188,7 @@ def playGame(wild):
                         breakout = True
                     clear()
 
-        def battleOption3():
+        def switchPokemon():
             breakout = False
             while not breakout:
                 try:
@@ -1225,9 +1226,9 @@ def playGame(wild):
 
         def battlePicker(args):
             switcher = {
-                1: battleOption1,
-                2: battleOption2, 
-                3: battleOption3
+                1: attackOptions,
+                2: bagOptions, 
+                3: switchPokemon
             }
 
             return switcher.get(args, invalid)()

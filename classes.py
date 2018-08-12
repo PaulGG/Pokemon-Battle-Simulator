@@ -7,6 +7,7 @@ import time
 import os
 import copy
 import pygame
+from typing import List, Dict
 
 pygame.mixer.init(48000, -16, 1, 1024)
 def clear():
@@ -44,46 +45,6 @@ def playSound(sound):
     except:
         None
 
-class Player: 
-    def __init__(self, pokemon, backpack, pc): 
-        self.pokemon = pokemon 
-        self.backpack = backpack 
-        self.pc = pc
-        self.money = 0
-        if self.pokemon[0]:
-            for p in pokemon:
-                if p.fainted is False:
-                    self.activePokemon = p
-                    break
-        else:
-            self.activePokemon = None
-    
-
-    def setActivePokemon(self):
-        if self.pokemon[0]:
-            for p in self.pokemon:
-                if p.fainted is False:
-                    self.activePokemon = p
-                    break
-        else:
-            self.activePokemon = None
-
-    def takeMoney(self, amount):
-        self.money -= amount
-        if self.money < 0:
-            self.money = 0
-            print("You paid all your money to the winner...")
-        print("You paid $" + str(amount) + " to the winner...")
-    
-    def giveMoney(self, amount):
-        self.money += amount
-        print("You were given $" + str(amount) + ".")
-        sleep()
-        clear()
-
-    def getMoney(self):
-        return self.money
- 
 class Backpack:
     def __init__(self, stacks):
         self.stacks = stacks
@@ -776,3 +737,47 @@ class Type:
         self.typeImmunities = typeImmunities
  
 environment = Environment()
+
+class Player: 
+    pokemon: List[Pokemon]
+    backpack: List[Item]
+    pc: List[Pokemon]
+    def __init__(self, pokemon, backpack, pc): 
+        self.pokemon = pokemon 
+        self.backpack = backpack 
+        self.pc = pc
+        self.money = 0
+        if self.pokemon[0]:
+            for p in pokemon:
+                if p.fainted is False:
+                    self.activePokemon = p
+                    break
+        else:
+            self.activePokemon = None
+    
+
+    def setActivePokemon(self):
+        if self.pokemon[0]:
+            for p in self.pokemon:
+                if p.fainted is False:
+                    self.activePokemon = p
+                    break
+        else:
+            self.activePokemon = None
+
+    def takeMoney(self, amount):
+        self.money -= amount
+        if self.money < 0:
+            self.money = 0
+            print("You paid all your money to the winner...")
+        print("You paid $" + str(amount) + " to the winner...")
+    
+    def giveMoney(self, amount):
+        self.money += amount
+        print("You were given $" + str(amount) + ".")
+        sleep()
+        clear()
+
+    def getMoney(self):
+        return self.money
+ 
