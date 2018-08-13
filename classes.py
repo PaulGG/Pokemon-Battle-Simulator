@@ -113,29 +113,17 @@ class PokeBall(GenericPokeBall):
         # TODO: fix prices for all poke ball variants
         GenericPokeBall.__init__(self, "Poke Ball", 1, 100)
     
-    def use(self, user=None):
-        return
-
 class GreatBall(GenericPokeBall):
     def __init__(self):
         GenericPokeBall.__init__(self, "Great Ball", 1.5, 200)
 
-    def use(self, user=None):
-        return
-
 class UltraBall(GenericPokeBall):
     def __init__(self):
         GenericPokeBall.__init__(self, "Ultra Ball", 2, 500)
-    
-    def use(self, user=None):
-        return
 
 class MasterBall(GenericPokeBall):
     def __init__(self):
         GenericPokeBall.__init__(self, "Master Ball", 255, 10000)
-
-    def use(self, user=None):
-        return
 
 class RevivalItem(Item):
     def __init__(self, name, reviveLevel, price):
