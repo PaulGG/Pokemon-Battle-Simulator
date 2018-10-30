@@ -208,13 +208,13 @@ def typeInput(msg, prim):
             print("You must have a primary type. ")
             sleep()
             clear()
-            continue
-        usrType = types.get(usrIn.lower())
-        if usrType:
-            return usrType
-        print("Type not recognized.")
-        sleep()
-        clear()
+        else:
+            usrType = types.get(usrIn.lower())
+            if usrType:
+                return usrType
+            print("Type not recognized.")
+            sleep()
+            clear()
 
 def pokeShop():
     def itemChooser(args):
@@ -606,7 +606,6 @@ def settingsEditor():
                 print("Cannot change volume because game is muted. Please unmute in settings.")
                 sleep()
                 clear()
-                continue
             else:
                 usrIn2 = getInputWithConstraints("Please select a value between 0.0 and 1.0. (~ to exit) ", True, None, 0.0, 1.0, True)
                 if usrIn2 == "~":
@@ -621,7 +620,6 @@ def settingsEditor():
                 print("Cannot change volume because game is muted. Please unmute in settings.")
                 sleep()
                 clear()
-                continue
             else:
                 usrIn2 = getInputWithConstraints("Please select a value between 0.0 and 1.0. (~ to exit) ", True, None, 0.0, 1.0, True)
                 if usrIn2 == "~":
