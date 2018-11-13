@@ -1,3 +1,7 @@
+# Note: Soon, when I have the time, I am going to continue working on this project by getting all the pokemon in the game through a web api known as PokeAPI. Currently I have hardcoded pokemon, and I would like to have all of them in the game along with all of their moves. This will be a massive effort and lots of scaling will need to be involved, so I will have to ensure that the game is as bug-free as it can get. Once it reaches that point, I hope to be able to release it as a general command line game. 
+
+https://github.com/PokeAPI/pykemon
+
 Welcome to Pokemon Battle Simulator!
 
 YOU NEED TO INSTALL PYGAME AS A DEPENDENCY.
