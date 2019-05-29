@@ -9,32 +9,33 @@ import copy
 import pygame
 from typing import List, Dict
 
-pygame.mixer.init(48000, -16, 1, 1024)
+# pygame.mixer.init(48000, -16, 1, 1024)
 def clear():
     if os.name == "nt":
         os.system('cls')
     elif os.name == "posix" or os.name == "mac":
         os.system("clear")
-try:
-    notEffective = pygame.mixer.Sound("sounds/not_effective.wav")
-except pygame.error:
-    notEffective = None
-try:
-    normalEffective = pygame.mixer.Sound("sounds/normal_effective.wav")
-except pygame.error:
-    normalEffective = None
-try:
-    superEffective = pygame.mixer.Sound("sounds/super_effective.wav")
-except pygame.error:
-    superEffective = None
-try:
-    useItemSound = pygame.mixer.Sound("sounds/use_item.wav")
-except pygame.error:
-    useItemSound = None
-try:
-    buyItem = pygame.mixer.Sound("sounds/bought_item.wav")
-except pygame.error:
-    buyItem = None
+
+# try:
+#     notEffective = pygame.mixer.Sound("sounds/not_effective.wav")
+# except pygame.error:
+#     notEffective = None
+# try:
+#     normalEffective = pygame.mixer.Sound("sounds/normal_effective.wav")
+# except pygame.error:
+#     normalEffective = None
+# try:
+#     superEffective = pygame.mixer.Sound("sounds/super_effective.wav")
+# except pygame.error:
+#     superEffective = None
+# try:
+#     useItemSound = pygame.mixer.Sound("sounds/use_item.wav")
+# except pygame.error:
+#     useItemSound = None
+# try:
+#     buyItem = pygame.mixer.Sound("sounds/bought_item.wav")
+# except pygame.error:
+#     buyItem = None
 
 def sleep():
     time.sleep(2)

@@ -1,0 +1,27 @@
+{
+    "name": "username",
+    "bag": {
+        "contents" : [
+			{
+        		"itemname": "name",
+        		"amount": 1
+    		}
+        ]
+    },
+	"team": {
+        "contents": [
+            {
+                "name" : "Pokemon 1"
+            }
+        ]
+    },
+    "pc": {
+        "contents" : [
+            {"name":  "PC Pokemon 1"}
+        ]
+    },
+    "money": 1000,
+    "settings": {
+        "mut": false
+    }
+}
